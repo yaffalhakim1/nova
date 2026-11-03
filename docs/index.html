@@ -128,22 +128,21 @@ img{max-width:100%}
 .rise-4{animation-delay:210ms}
 
 /* hero */
-.hero{padding-block:var(--space-lg) 0;text-align:center}
-.hero h1{font-size:clamp(38px,5vw,68px);max-width:14ch;margin-inline:auto}
-.hero .sub{margin:var(--space-md) auto 0;font-size:18px;color:var(--ink-dim);max-width:44ch}
+.hero{padding-block:var(--space-sm) 0;text-align:center}
+.hero h1{font-size:clamp(36px,4.6vw,62px);max-width:14ch;margin-inline:auto}
+.hero .sub{margin:var(--space-sm) auto 0;font-size:17px;color:var(--ink-dim);max-width:44ch}
 .hero-actions{display:flex;justify-content:center;align-items:center;gap:var(--space-lg);flex-wrap:wrap;
-  margin-top:var(--space-lg)}
+  margin-top:var(--space-md)}
 .ghost-link{font-size:15px;font-weight:400;color:var(--ink-dim);
   text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--ink-faint);
   transition:color var(--dur-hover) var(--ease-out)}
 .ghost-link:hover{color:var(--ink);text-decoration-color:var(--ink)}
 
 /* hero shot: the product, floating on one soft glow; capped so the hero is one screen */
-.hero-shot{margin-top:var(--space-2xl);position:relative}
+.hero-shot{margin-top:var(--space-lg);position:relative;max-width:960px;margin-inline:auto}
 .hero-shot::before{content:"";position:absolute;inset:-8% -12% -20%;
   background:radial-gradient(52% 46% at 50% 42%,var(--glow-accent),transparent 70%);
   pointer-events:none}
-.hero-shot .shot img{aspect-ratio:21/9;object-fit:cover;object-position:50% 42%}
 .shot{position:relative;margin:0;border-radius:var(--radius-frame);overflow:hidden;
   background:var(--well);box-shadow:var(--shadow-shot)}
 .shot::after{content:"";position:absolute;inset:0;border-radius:var(--radius-frame);
