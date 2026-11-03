@@ -34,6 +34,7 @@
   --kbd-line:rgba(255,255,255,.12);
   --glow-accent:rgba(91,141,255,.14);
   --glow-band:rgba(91,141,255,.09);
+  --particle:#cfe0ff;
   --shadow-btn:0 8px 32px rgba(246,248,255,.18);
   --shadow-deep:0 8px 32px rgba(0,0,0,.35);
   --shadow-shot:0 30px 80px rgba(0,0,0,.55),0 8px 24px rgba(0,0,0,.4);
@@ -143,6 +144,10 @@ img{max-width:100%}
 .hero-shot::before{content:"";position:absolute;inset:-8% -12% -20%;
   background:radial-gradient(52% 46% at 50% 42%,var(--glow-accent),transparent 70%);
   pointer-events:none}
+
+/* ambient drift: the app's own particles, on the page */
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+main,header.nav,footer{position:relative;z-index:1}
 .shot{position:relative;margin:0;border-radius:var(--radius-frame);overflow:hidden;
   background:var(--well);box-shadow:var(--shadow-shot)}
 .shot::after{content:"";position:absolute;inset:0;border-radius:var(--radius-frame);
@@ -228,6 +233,7 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
   .rise{animation:none}
   *{transition-duration:.01ms!important}
   *::before{display:none}
+  #fx{display:none}
 }
 </style>
 </head>
@@ -243,6 +249,8 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
     </div>
   </nav>
 </header>
+
+<canvas id="fx" aria-hidden="true"></canvas>
 
 <main id="top">
   <section class="hero container" aria-label="Nova">
@@ -348,6 +356,50 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
   </div>
   <p class="legal">A personal project. Game names, artwork and descriptions belong to the games they describe. Nova runs on this machine, reads Steam’s public store data, and sends your Steam Web API key to Steam and nowhere else.</p>
 </footer>
+
+<script>
+/* Ambient drift: the same particles the launcher carries behind its games.
+ * 46 soft dots rising slowly, brightness breathing on a sine, each with its
+ * own phase. Runs on the canvas, off the layout; rAF throttles itself when
+ * the tab is hidden, and reduced motion never starts it. */
+(function(){
+  "use strict";
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var c = document.getElementById("fx");
+  var x = c.getContext("2d");
+  if (!x) return;
+  var W, H, dpr = Math.min(2, window.devicePixelRatio || 1);
+  function size(){ W = c.width = innerWidth * dpr; H = c.height = innerHeight * dpr; }
+  size();
+  addEventListener("resize", size);
+  var P = [];
+  for (var i = 0; i < 46; i++) P.push({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.8 + 0.4,
+    s: Math.random() * 0.00006 + 0.00002,
+    a: Math.random() * 0.6 + 0.15,
+    p: Math.random() * 6.283
+  });
+  var dot = getComputedStyle(document.documentElement).getPropertyValue("--particle").trim() || "#cfe0ff";
+  function frame(t){
+    x.clearRect(0, 0, W, H);
+    x.fillStyle = dot;
+    for (var i = 0; i < P.length; i++){
+      var q = P[i];
+      q.y -= q.s * 16;
+      q.x += Math.sin(t / 4000 + q.p) * 0.00012;
+      if (q.y < -0.02){ q.y = 1.02; q.x = Math.random(); }
+      x.globalAlpha = q.a * (0.6 + 0.4 * Math.sin(t / 1500 + q.p));
+      x.beginPath();
+      x.arc(q.x * W, q.y * H, q.r * dpr, 0, 6.283);
+      x.fill();
+    }
+    x.globalAlpha = 1;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 
 </body>
 </html>
