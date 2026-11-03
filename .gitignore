@@ -17,3 +17,8 @@ build/
 
 # editor / OS noise
 .DS_Store
+
+# task scratchpads, kept locally
+task.md
+implementation_plan.md
+walkthrough.md

@@ -1,4 +1,4 @@
-# AGENTS.md — nova
+# AGENTS.md: nova
 
 Read this before changing anything. It is the state of the project, not a
 wishlist.
@@ -60,7 +60,7 @@ internal/app                 the whole interface
 - The picked folder **is the game's own folder**, not a folder full of games.
   That is the whole difference from adding a games folder, which still exists
   under the Wand menu.
-- **`ManualGame.Exe` is relative to `Dir`, always.** `ExeFor` refuses a path
+- **`ManualGame.Exe` stays relative to `Dir`.** `ExeFor` refuses a path
   that climbs out with `..` or is absolute. A relative path survives the folder
   moving; an absolute one does not.
 - Genre, description and cover hue are shown only when Steam has nothing, or
@@ -84,7 +84,7 @@ internal/app                 the whole interface
   (`C:\Program Files (x86)\Steam`), not under `Y:\SteamLibrary`.
 - **Two traps in the VDF reader** (`internal/steam/local.go`), both found on real
   files and both pinned by tests:
-  1. Steam stores JSON as an escaped string —
+  1. Steam stores JSON as an escaped string,
      `"Key" "{\"a\":1}"`. Braces inside a value are not block delimiters, and
      escaped quotes must not end the string.
   2. Empty values exist, as `"storepreferences" ""`. An empty token is a value,
@@ -95,7 +95,7 @@ internal/app                 the whole interface
 
 `app.play(e)`:
 
-1. `startGame(e)` — `exec.Command(e.inst.Exe)` with `cmd.Dir` set to the
+1. `startGame(e)`: `exec.Command(e.inst.Exe)` with `cmd.Dir` set to the
    **game's own folder** (most games resolve assets relative to cwd) and
    `CREATE_NO_WINDOW`. That folder rule is the one thing that matters: launching
    from the launcher's cwd is the classic "game starts then crashes".
@@ -118,12 +118,12 @@ internal/app                 the whole interface
   the backdrop glows, and the glows are centred on the selected capsule.
 - **The detail page's full-bleed art is the store's wide background**, not the
   cover. `backdropURLs` asks for Steam's `page_bg_raw.jpg`, which is
-  **1438x810 (16:9)** — the shape that page needs. The 2:3 cover is only a
+  **1438x810 (16:9)**, the shape that page needs. The 2:3 cover is only a
   fallback, because filling a wide page with a portrait crops most of the game
   away. Tiles keep the portrait cover; the two never swap.
 - Changing game **cross-fades** the backdrops over one second: the outgoing
   game's glows at `1-t`, the incoming at `t`, over a shared ground. Painting a
-  second full backdrop opaque on top does not fade — it covers.
+  second full backdrop painted opaque on top covers the first instead of fading.
 
 ## Interface map
 
@@ -160,7 +160,7 @@ internal/app                 the whole interface
 - The description's "About" card shows six lines; `blurb` still cuts the store
   text at 380 characters first, which is not a measured line count, because
   MyGo's `MaxLines` truncates visually but cannot be asked whether it truncated.
-- The hub's Trophies, Completion and Recent sessions cards say so honestly: this
+- The hub's Trophies, Completion and Recent sessions cards state that plainly: this
   app has no achievement data, no completion percentage, and no per-session log
   (`gameStats` keeps only `Played`, `Sessions`, `Last`). Do not invent them.
 - MyGo toasts are bottom-centre; the design puts them top-centre.

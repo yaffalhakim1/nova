@@ -1,39 +1,38 @@
 # Nova
 
-A native Windows **game launcher**. It finds the games already installed on your
-machine — the ones Steam has manifests for, the ones in a folder of your own, and
-the ones you add by hand — shows each with its real cover art and store
-description, and starts it.
+A native Windows **game launcher**. It lists the games on your machine and starts
+them.
 
 ![The home screen](docs/screenshots/home.png)
 
-It is a launcher, not a store: nothing is bought, nothing is downloaded, and no
-account is required. It never mods, patches or injects into a game — it lists
-what you have and runs it.
+Nova reads Steam's app manifests, scans any games folder you point it at, and
+picks up the games you add by hand. Each one gets the cover, description and
+screenshots Steam publishes, and the window takes its colour from the artwork you
+select.
+
+Nothing here is bought or downloaded, and no account is needed. Nova lists what you
+have and runs it. It does not mod, patch or inject into a game.
 
 Built with [MyGo](https://github.com/egoist/mygo): native UI, no web view, no
 bundled runtime.
 
 ## What it does
 
-- **Finds your games.** Steam libraries are read from their app manifests, and
-  any folder you add is scanned for game executables. Steam's own redistributables
-  and tools are skipped.
-- **Adds the one game a scan misses.** Pick a repack's own folder and give it a
-  name, a genre, a description and a cover colour. Its executable is stored
-  relative to that folder, so moving the folder does not break it.
-- **Shows the real thing.** Each game gets the cover Steam ships, its store
-  description, its screenshots and its wide store artwork, fetched once and
-  cached on disk.
+- **Finds your games.** Nova reads Steam's `appmanifest_*.acf` files and scans any
+  folder you add for executables. Steam's redistributables and tools get skipped.
+- **Adds the game a scan misses.** Point it at a repack's folder, then give it a
+  name, genre, description and cover colour. The executable path stays relative to
+  that folder, so moving the folder keeps the entry working.
+- **Shows Steam's artwork.** The cover, the store description, the screenshots and
+  the 16:9 store backdrop. Fetched once, cached on disk.
 - **Takes the game's colour.** The accent, the focus ring and the backdrop glows
-  are sampled from the selected game's cover, so the window changes with what you
-  pick. Changing game cross-fades the backdrop over one second.
-- **Remembers what you played.** Time played and session counts are kept per game.
-  Play time is also imported from the Steam account Steam used last, so a fresh
-  install shows real hours instead of an empty history — merged as `max`, never
-  added, so nothing is ever double-counted.
-- **Shows your achievements.** With a Steam Web API key, the full achievement list
-  for a game, with each one's real rarity and unlock date.
+  sample the selected cover, so the window changes when you change game. The
+  backdrop cross-fades over one second.
+- **Keeps play time.** Hours and sessions per game. Nova also imports the totals
+  from Steam's own config, so a first run shows real hours instead of zeroes. It
+  merges those as `max`, so an import cannot count the same hour twice.
+- **Shows achievements.** With a Steam Web API key, a game's full list, with each
+  achievement's rarity and the date you unlocked it.
 - **Starts the game.** One click, from the game's own folder, with no console
   window.
 
@@ -43,9 +42,9 @@ bundled runtime.
 |---|---|
 | ![Library](docs/screenshots/library.png) | ![Game page](docs/screenshots/detail.png) |
 
-Every game is a card you can open; the game page is a strip of cards — trophies,
-activity, game info, screenshots and the store description — over the game's own
-full-bleed artwork.
+Each game is a card you can open. Open one and you get a strip: achievements,
+activity, game info, screenshots and the store description, laid over the game's
+own full-bleed artwork.
 
 ![Achievements](docs/screenshots/trophies.png)
 
@@ -75,7 +74,7 @@ go tool mygo dev
   Clone [`egoist/mygo`](https://github.com/egoist/mygo) next to this repository
   and the build works. Point the `replace` at wherever you keep it.
 - **Optionally, Steam.** Without it the launcher reads only the folders you add.
-  The achievement list additionally needs a free
+  The achievement list also needs a free
   [Steam Web API key](https://steamcommunity.com/dev/apikey).
 
 ## Where your data lives
@@ -89,12 +88,12 @@ Everything this app writes goes to `%APPDATA%\nova\`:
 | `covers\` | the cover art, cached |
 | `store\` | store descriptions, artwork and achievements, cached |
 
-Steam's own files are only ever **read**, never written: `config\loginusers.vdf`
-for the accounts, and `userdata\<id>\config\localconfig.vdf` for play time.
+Nova reads Steam's files and writes none of them: `config\loginusers.vdf` for the
+accounts, `userdata\<id>\config\localconfig.vdf` for play time.
 
-The Steam API key is not stored in that folder. It goes to the system credential
-store — Windows Credential Manager, the macOS Keychain, or Secret Service on Linux
-— through `mygo.Secrets`, and is only ever sent to Steam.
+The Steam API key does not go in that folder. It goes to the system credential
+store: Windows Credential Manager, the macOS Keychain, or Secret Service on Linux,
+through `mygo.Secrets`. Nova sends it to Steam and nowhere else.
 
 ## Keyboard
 
@@ -130,40 +129,39 @@ store — Windows Credential Manager, the macOS Keychain, or Secret Service on L
 }
 ```
 
-`exe` is always relative to `dir`. An entry whose folder or executable has gone is
-skipped rather than shown as a dead tile.
+`exe` stays relative to `dir`, which is why moving a game's folder does not break
+its entry. Nova skips an entry whose folder or executable has gone, rather than
+showing a tile that cannot start.
 
 ## How it works
 
-- **`internal/library`** finds installs: Steam manifests plus a folder scan plus
-  the games added by hand. An install is a manifest (or a folder) plus an
-  executable; a Steam tool or a redistributable is not a game.
-- **`internal/steam`** reads Steam. The store page, the account's play time from
-  its own config files, the owned-games list and the achievements all live here,
-  each cached on disk with an expiry.
-- **`internal/app`** is the whole interface. `home.go` is the carousel, `hub.go`
+- **`internal/library`** finds installs from Steam manifests, a folder scan and the
+  games you added by hand. An install is a manifest or folder plus an executable. A
+  Steam tool or a redistributable does not count as a game.
+- **`internal/steam`** reads Steam. The store page, the account's play time from its
+  own config files, the owned-games list and the achievements all live here, each
+  cached on disk with an expiry.
+- **`internal/app`** is the whole interface. `home.go` holds the carousel, `hub.go`
   the game page, `library.go` the grid, `art.go` the generated artwork, and
   `theme.go` the palette.
 
 ## Known limits
 
 - **Steam folders without `appmanifest_*.acf` are invisible.** No manifest means no
-  app id, and the launcher deliberately does not guess. Add the folder by hand
-  instead.
-- **Games that need the Steam client running must start it themselves.** The fix
-  (not implemented) is `steam://rungameid/<appid>` as a fallback when a launch
-  fails.
-- **Tiles are 2:3, never square.** Steam ships no square asset; its portrait
-  covers are exactly 2:3, so the tile matches the art and nothing is cropped.
-- **Achievement tiers come from rarity, not from Steam.** Steam has no
-  bronze/silver/gold/platinum — that is a PlayStation concept. A tier here means
-  "how few players hold this", using Steam's published percentages.
+  app id, and Nova does not guess one. Add the folder by hand instead.
+- **Games that need the Steam client running must start it themselves.** A fix I
+  have not built: `steam://rungameid/<appid>` as a fallback when a launch fails.
+- **Tiles are 2:3.** Steam publishes no square asset. Its portrait covers are
+  exactly 2:3, so the tile matches the art and nothing gets cropped.
+- **Achievement tiers come from rarity.** Steam has no bronze, silver, gold or
+  platinum; that is a PlayStation concept. A tier here means how few players hold
+  the achievement, worked out from the percentages Steam publishes.
 - **Some store pages open with marketing** before they describe the game. Nova
-  strips the common openers, but a page whose award line runs into its
-  description with no full stop keeps that line.
+  strips the usual openers. A page whose award line runs into its description with
+  no full stop keeps that line.
 
 ## License
 
 Personal project. The artwork, names and descriptions it displays belong to the
-games they describe, and are read from Steam's public store API and your own
-installation.
+games they describe. Nova reads them from Steam's public store API and from your
+own installation.
