@@ -22,3 +22,6 @@ build/
 task.md
 implementation_plan.md
 walkthrough.md
+
+# hallmark render scratch
+docs/.hallmark/

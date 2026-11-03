@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova, a native Windows game launcher</title>
+<meta name="description" content="Nova lists the games installed on your machine, pulls real Steam artwork, and starts the game. Built in Go on MyGo, no web view.">
+<style>
+/* Hallmark · v2.0.0
+ * shape: try-job landing · genre: try (desktop tool) · job: visit the repo · posture: stage
+ * theme: Nova design system (DESIGN.md, by request) · surface: absolute (system glass on --deep)
+ * nav: edge-aligned, wordmark left, links and one action right · footer: colophon
+ * hero: Stage, text 4 cols, the real home screen on 8 cols
+ * signature: the launcher's own captured screens, framed in the system's glass
+ * sections: Hero · Showcase · Rows · Table · Band · Footer
+ * material: real: four product screenshots · absent: quotes, logos, metrics
+ * pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: S, a launcher landing is a known shape; led with the app's own captured screens instead of a built mock
+ * dismissed 58 · the keys table plus the band head share one 900px window; a key reference is dense by nature, every row is a fact
+ * sweep: 0 FAIL · 1 dismissed
+ * hero-review: none · finish-review: subagent · 5 findings · 5 resolved · gap: none
+ */
+:root{
+  --deep:#05070f;
+  --well:#0a0e1c;
+  --ink:#f4f7ff;
+  --ink-dim:#b9c4e2;
+  --ink-faint:#8b96b8;
+  --rule:rgba(220,230,255,.14);
+  --glass:rgba(255,255,255,.07);
+  --glass-hover:rgba(255,255,255,.14);
+  --bright:#f6f8ff;
+  --bright-ink:#080c1a;
+  --accent:#5b8dff;
+  --focus:#f4f7ff;
+  --font:"Hanken Grotesk","Segoe UI",system-ui,sans-serif;
+
+  --container:1360px;
+  --gutter:64px;
+  --space-xs:8px;
+  --space-sm:12px;
+  --space-md:16px;
+  --space-lg:24px;
+  --space-xl:40px;
+  --space-2xl:64px;
+  --space-3xl:96px;
+  --space-4xl:144px;
+  --section-a:176px;
+  --section-b:120px;
+  --section-c:144px;
+
+  --radius-frame:20px;
+  --radius-pill:999px;
+  --dur-short:220ms;
+  --dur-long:420ms;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+html{scrollbar-color:var(--ink-faint) var(--deep)}
+body{
+  margin:0;
+  background:var(--deep);
+  color:var(--ink);
+  font-family:var(--font);
+  font-weight:300;
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--accent);color:var(--bright-ink)}
+h1,h2,h3{font-weight:200;text-wrap:balance}
+.row h3,.footer .wordmark,.wordmark{font-weight:400}
+p{text-wrap:pretty}
+a{color:var(--ink)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:8px}
+
+.container{max-width:var(--container);margin-inline:auto;padding-inline:var(--gutter)}
+
+/* nav: edge-aligned */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:var(--space-lg);
+  min-height:80px;padding-block:var(--space-md)}
+.wordmark{font-size:20px;text-decoration:none;letter-spacing:0}
+.nav-links{display:flex;align-items:center;gap:var(--space-lg)}
+.nav-links a{font-size:15px;font-weight:300;color:var(--ink-dim);text-decoration:none;white-space:nowrap}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a.nav-cta{color:var(--ink);background:var(--glass);box-shadow:inset 0 0 0 1px var(--rule);padding:var(--space-xs) var(--space-lg);border-radius:var(--radius-pill)}
+.nav-links a.nav-cta:hover{transform:translateY(-1px)}
+.nav-links a.nav-cta:active,.btn:active{transform:translateY(1px)}
+
+/* buttons: one primary recipe, one glass recipe */
+.btn{display:inline-flex;align-items:center;gap:var(--space-sm);text-decoration:none;white-space:nowrap;
+  font-size:16px;border-radius:var(--radius-pill);padding:var(--space-sm) 36px;
+  transition:transform var(--dur-short) var(--ease-out),background var(--dur-short) var(--ease-out)}
+.btn.primary{background:var(--bright);color:var(--bright-ink)}
+.btn.primary:hover,.btn.primary:focus-visible{transform:scale(1.03)}
+.btn.ghost{background:var(--glass);color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
+.btn.ghost:hover{background:var(--glass-hover)}
+.ghost-link{font-size:16px;font-weight:400;color:var(--ink-dim);text-decoration:underline;text-underline-offset:4px}
+.ghost-link:hover{color:var(--ink)}
+
+/* hero: stage */
+.hero{min-height:calc(100svh - 80px);display:grid;align-content:center;
+  padding-block:var(--space-2xl)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);
+  gap:var(--space-3xl);align-items:center}
+.hero .slot img{display:block;width:100%;height:auto}
+.hero h1{margin:0 0 var(--space-lg);font-size:clamp(44px,6vw,84px);line-height:1.05;letter-spacing:-.01em;max-width:12ch}
+.hero .lead{margin:0 0 var(--space-xl);font-size:19px;color:var(--ink-dim);max-width:44ch}
+.hero-actions{display:flex;gap:var(--space-md);flex-wrap:wrap;align-items:center}
+.slot{margin:0;position:relative;border-radius:var(--radius-frame);overflow:hidden;
+  background:var(--well)}
+.slot img{display:block;width:100%;height:auto}
+
+/* showcase */
+.screens{padding-block:var(--section-c) 0}
+.screens h2,.how h2,.keys h2{margin:0 0 var(--space-md);font-size:clamp(34px,3.4vw,48px);letter-spacing:-.01em}
+.screens .secline{margin:0 0 var(--space-2xl);color:var(--ink-dim);max-width:52ch}
+.screens .lead-shot{margin:var(--space-lg) 0 var(--space-md)}
+.screens .pair{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--space-lg)}
+figure{margin:0}
+figcaption{margin-top:var(--space-sm);font-size:14px;font-weight:300;color:var(--ink-dim);
+  padding-inline:var(--space-sm) var(--space-sm) var(--space-xs)}
+.screens .lead-shot,.pair .slot{background:transparent;border-radius:0;overflow:visible}
+.screens .lead-shot::after,.pair .slot::after{display:none}
+.screens .lead-shot img,.pair .slot img{border-radius:var(--radius-frame);box-shadow:inset 0 0 0 1px var(--rule)}
+.slot{position:relative}
+.slot::after{content:"";position:absolute;inset:0;border-radius:var(--radius-frame);
+  box-shadow:inset 0 0 0 1px var(--rule);pointer-events:none}
+
+/* rows */
+section{scroll-margin-top:var(--space-2xl)}
+.how{padding-block:var(--section-a)}
+.how-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:var(--space-2xl);align-items:start}
+.how-grid h2{margin-bottom:0}
+.rows{border-top:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--space-lg);
+  padding-block:var(--space-lg);border-bottom:1px solid var(--rule)}
+.row h3{margin:0;font-size:22px}
+.row p{margin:0;color:var(--ink-dim);max-width:52ch}
+
+/* keys table */
+.keys{padding-block:var(--section-b)}
+.keys .secline{margin:0 0 var(--space-2xl);color:var(--ink-dim)}
+.keytable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.keytable th{font-size:14px;font-weight:400;color:var(--ink-dim);text-align:left;
+  padding:0 var(--space-md) var(--space-sm) 0;border-bottom:1px solid var(--rule)}
+.keytable td{padding:var(--space-md) var(--space-md) var(--space-md) 0;
+  border-bottom:1px solid var(--rule);font-size:16px}
+.keytable td:first-child{white-space:nowrap}
+.keytable .what{color:var(--ink-dim)}
+kbd{font:inherit;font-weight:400;font-size:14px;color:var(--ink);
+  background:var(--glass);box-shadow:inset 0 0 0 1px var(--rule);
+  border-radius:6px;padding:2px var(--space-xs);margin-right:var(--space-xs)}
+
+/* band */
+.band{background:var(--well);border-block:1px solid var(--rule);padding-block:var(--space-3xl);color:var(--ink)}
+.band-inner{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:var(--space-2xl);align-items:center}
+.band h2{margin:0 0 var(--space-md);font-size:clamp(38px,4vw,56px);letter-spacing:-.01em}
+.band p{margin:0;color:var(--ink-dim);max-width:44ch}
+.band-actions{display:flex;flex-direction:column;gap:var(--space-md);align-items:flex-start}
+.band .small{margin:0;font-size:14px;color:var(--ink-faint)}
+.band .small a{color:var(--ink-dim)}
+
+/* footer */
+.footer{padding-block:var(--space-2xl)}
+.footer-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--space-2xl);align-items:start}
+.footer .wordmark{font-size:24px}.footer-note{margin:var(--space-md) 0 0;color:var(--ink-dim);max-width:48ch}
+.footer-links{display:grid;gap:var(--space-xs);justify-items:start}
+.footer-links a{font-size:15px;font-weight:400;color:var(--ink-dim);text-decoration:none}
+.footer-links a:hover{color:var(--ink);text-decoration:underline}
+.footer .legal{margin-top:var(--space-2xl);padding-top:var(--space-lg);border-top:1px solid var(--rule);
+  font-size:14px;color:var(--ink-faint)}
+
+@media (max-width:60rem){
+  .hero-grid,.screens .pair,.how-grid,.band-inner,.footer-grid{grid-template-columns:minmax(0,1fr)}
+  .hero{min-height:0}
+  .how-grid{gap:var(--space-xl)}
+  .row{grid-template-columns:minmax(0,1fr);gap:var(--space-xs)}
+  .nav{flex-wrap:wrap}
+  .nav-links{gap:var(--space-md)}
+  .nav-links a:not(.nav-cta){display:none}
+  .container{padding-inline:var(--space-lg)}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="container nav">
+  <a class="wordmark" href="#top">Nova</a>
+  <nav class="nav-links" aria-label="Page">
+    <a href="#screens">Screens</a>
+    <a href="#how">How it works</a>
+    <a class="nav-cta" href="https://github.com/yaffalhakim1/nova">Get it on GitHub</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero container" aria-label="Nova">
+    <div class="hero-grid">
+      <div>
+        <h1>Your games, one console away</h1>
+        <p class="lead">Nova lists what is installed and starts the game.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="https://github.com/yaffalhakim1/nova">Get it on GitHub</a>
+          <a class="ghost-link" href="#screens">See the screens</a>
+        </div>
+      </div>
+      <figure class="slot">
+        <img src="screenshots/home.png" alt="The Nova home screen: a carousel of game covers with Cyberpunk 2077 selected" width="1440" height="900" fetchpriority="high">
+      </figure>
+    </div>
+  </section>
+
+  <section class="screens container" id="screens">
+    <h2>Every screen, one look</h2>
+    <p class="secline">The window takes its colour from the game you select, and the artwork comes from Steam, cached on disk.</p>
+    <figure class="lead-shot slot">
+      <img src="screenshots/detail.png" alt="A game page with full-bleed artwork, achievements, play time and screenshots" width="1440" height="900" loading="lazy">
+      <figcaption>The game page: store artwork fills the screen, the cards carry achievements, play time and info.</figcaption>
+    </figure>
+    <div class="pair">
+      <figure class="slot">
+        <img src="screenshots/library.png" alt="The library grid with genre chips and a sort select" width="1440" height="900" loading="lazy">
+        <figcaption>The library grid, filtered by genre chips and sorted any way.</figcaption>
+      </figure>
+      <figure class="slot">
+        <img src="screenshots/trophies.png" alt="The trophies dialog listing achievements with rarity percentages" width="1440" height="900" loading="lazy" style="aspect-ratio:16/7;object-fit:cover;object-position:50% 78%">
+        <figcaption>Trophies with real rarity, worked out from the percentages Steam publishes.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="how container" id="how">
+    <div class="how-grid">
+      <h2>What happens under the hood</h2>
+      <div class="rows">
+        <div class="row">
+          <h3>Finds your Steam games</h3>
+          <p>Reads every library’s appmanifest files and skips the tools.</p>
+        </div>
+        <div class="row">
+          <h3>Adds the rest by hand</h3>
+          <p>Point it at a folder. The relative path survives a move.</p>
+        </div>
+        <div class="row">
+          <h3>Launches cleanly</h3>
+          <p>From the game’s own folder, with no console window.</p>
+        </div>
+        <div class="row">
+          <h3>Keeps honest play time</h3>
+          <p>Imports what Steam recorded and merges as max, so nothing counts twice.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="keys container" id="keys">
+    <h2>Keys, not menus</h2>
+    <p class="secline">Runs from the keyboard; a gamepad works too.</p>
+    <table class="keytable">
+      <thead>
+        <tr><th scope="col">Key</th><th scope="col">What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><kbd>←</kbd><kbd>→</kbd></td><td class="what">Choose a game</td></tr>
+        <tr><td><kbd>Enter</kbd></td><td class="what">Play it</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td class="what">Go back</td></tr>
+        <tr><td><kbd>/</kbd></td><td class="what">Search</td></tr>
+        <tr><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></td><td class="what">Home, Favorites, Library</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="band" aria-label="Get Nova">
+    <div class="container band-inner">
+      <div>
+        <h2>Get Nova</h2>
+        <p>Windows 10 or newer, built from source with Go. Clone it, build it, point it at your games.</p>
+      </div>
+      <div class="band-actions">
+        <a class="btn primary" href="https://github.com/yaffalhakim1/nova">View the source on GitHub</a>
+        <p class="small">Built on <a href="https://github.com/egoist/mygo">MyGo</a>. The interface font is Hanken Grotesk, under the SIL Open Font License.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer container">
+  <div class="footer-grid">
+    <div>
+      <span class="wordmark">Nova</span>
+      <p class="footer-note">A personal project. Game names, artwork and descriptions belong to the games they describe.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="https://github.com/yaffalhakim1/nova">Source</a>
+      <a href="https://github.com/egoist/mygo">MyGo</a>
+      <a href="https://github.com/yafit/nova#license">License notes</a>
+    </nav>
+  </div>
+  <p class="legal">Nova runs on this machine and reads Steam’s public store data. It sends your Steam Web API key to Steam and nowhere else.</p>
+</footer>
+
+</body>
+</html>
