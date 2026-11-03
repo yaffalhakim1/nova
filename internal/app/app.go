@@ -167,6 +167,9 @@ func Run() error {
 		return err
 	}
 
+	// The interface font, before any window draws text with it.
+	registerFonts()
+
 	mygo.App.WhenReady(func() {
 		a.win = mygo.NewWindow(mygo.WindowOptions{
 			Title:           "Nova",

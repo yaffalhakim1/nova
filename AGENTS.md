@@ -146,6 +146,7 @@ internal/app                 the whole interface
 | `particles.go` | the ambient drift |
 | `sound.go` | the four synthesised UI tones |
 | `stats.go` | play history: `%APPDATA%\nova\stats.json`, Steam merge |
+| `fonts.go` | the embedded Hanken Grotesk variable font, registered at startup |
 | `surfaces.go` | hover/press surfaces |
 | `theme.go` | palette tokens, `theme()`, `hsl` |
 

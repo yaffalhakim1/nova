@@ -26,6 +26,9 @@ var (
 func theme() *ui.Theme {
 	t := ui.DarkTheme()
 	t.Background = deep
+	// The design's face. It is embedded, so this does not depend on the machine
+	// having the font installed; the list after it is the design's own fallback.
+	t.Font = interfaceFont + ", Segoe UI, system-ui"
 	t.Surface = panelFill
 	t.SurfaceHover = ui.RGBA(255, 255, 255, 0.12)
 	t.SurfacePressed = ui.RGBA(255, 255, 255, 0.18)
