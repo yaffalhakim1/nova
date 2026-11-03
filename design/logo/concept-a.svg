@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Wand — concept A, letterform.
+
+  Construction: a 256 grid, cap height 152 (y=52 to y=204), stroke weight 30,
+  inner joints on a 32 grid, outer edges vertical.
+
+  The W is one outline so the joints are exact. Its middle vertex rises to
+  y=132 — above the baseline, below the cap line — which leaves a notch between
+  the two inner strokes. One square sits in that notch, not on top of it: the
+  tile that is picked out of the row, held by the letter rather than balanced
+  on it.
+-->
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#000000">
+    <!-- The W: two outer verticals and two inner diagonals meeting at y=132. -->
+    <path d="M28 52 H62 L96 176 L128 120 L160 176 L194 52 H228 L182 204 H150 L128 152 L106 204 H74 L28 52 Z"/>
+    <!-- The picked-out tile, seated in the notch the raised vertex leaves. -->
+    <rect x="112" y="76" width="32" height="32" rx="6" fill="#000000"/>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Wand — concept B, line.
+
+  Construction: one continuous stroke of weight 26 on a 22 grid, drawn as a
+  single path with round caps and joins. It runs flat, dips to a low vertex,
+  lifts to a high vertex, dips again and finishes flat — the carousel's track,
+  seen edge-on. The high vertex is the selected tile: the one place the line
+  rises above the others.
+
+  No containment, no letterform. It is the motion, not a symbol of the app.
+-->
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M32 96 L86 196 L128 96 L170 196 L224 96"
+        stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

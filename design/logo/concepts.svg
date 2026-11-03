@@ -1,0 +1,245 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="840" viewBox="0 0 1600 840"><defs><filter id="grey"><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="1600" height="840" fill="#f7f7f4"/><text x="60" y="78" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="40" font-weight="700" fill="#161616">Logo concepts</text><text x="60" y="116" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="20" fill="#6b6b6b">Concepts for review — pick a direction (or tell me what you like in each).</text><rect x="60" y="150" width="474.667" height="630" rx="18" fill="#fff" stroke="#161616" stroke-width="2"/><g filter="url(#grey)">
+<!--
+  Wand — concept A, letterform.
+
+  Construction: a 256 grid, cap height 152 (y=52 to y=204), stroke weight 30,
+  inner joints on a 32 grid, outer edges vertical.
+
+  The W is one outline so the joints are exact. Its middle vertex rises to
+  y=132 — above the baseline, below the cap line — which leaves a notch between
+  the two inner strokes. One square sits in that notch, not on top of it: the
+  tile that is picked out of the row, held by the letter rather than balanced
+  on it.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="90" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The W: two outer verticals and two inner diagonals meeting at y=132. -->
+    <path d="M28 52 H62 L96 176 L128 120 L160 176 L194 52 H228 L182 204 H150 L128 152 L106 204 H74 L28 52 Z"/>
+    <!-- The picked-out tile, seated in the notch the raised vertex leaves. -->
+    <rect x="112" y="76" width="32" height="32" rx="6" fill="#000000"/>
+  </g>
+</svg>
+</g><g filter="url(#grey)">
+<!--
+  Wand — concept A, letterform.
+
+  Construction: a 256 grid, cap height 152 (y=52 to y=204), stroke weight 30,
+  inner joints on a 32 grid, outer edges vertical.
+
+  The W is one outline so the joints are exact. Its middle vertex rises to
+  y=132 — above the baseline, below the cap line — which leaves a notch between
+  the two inner strokes. One square sits in that notch, not on top of it: the
+  tile that is picked out of the row, held by the letter rather than balanced
+  on it.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="90" y="516" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The W: two outer verticals and two inner diagonals meeting at y=132. -->
+    <path d="M28 52 H62 L96 176 L128 120 L160 176 L194 52 H228 L182 204 H150 L128 152 L106 204 H74 L28 52 Z"/>
+    <!-- The picked-out tile, seated in the notch the raised vertex leaves. -->
+    <rect x="112" y="76" width="32" height="32" rx="6" fill="#000000"/>
+  </g>
+</svg>
+</g><text x="122" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g filter="url(#grey)">
+<!--
+  Wand — concept A, letterform.
+
+  Construction: a 256 grid, cap height 152 (y=52 to y=204), stroke weight 30,
+  inner joints on a 32 grid, outer edges vertical.
+
+  The W is one outline so the joints are exact. Its middle vertex rises to
+  y=132 — above the baseline, below the cap line — which leaves a notch between
+  the two inner strokes. One square sits in that notch, not on top of it: the
+  tile that is picked out of the row, held by the letter rather than balanced
+  on it.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="180" y="548" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The W: two outer verticals and two inner diagonals meeting at y=132. -->
+    <path d="M28 52 H62 L96 176 L128 120 L160 176 L194 52 H228 L182 204 H150 L128 152 L106 204 H74 L28 52 Z"/>
+    <!-- The picked-out tile, seated in the notch the raised vertex leaves. -->
+    <rect x="112" y="76" width="32" height="32" rx="6" fill="#000000"/>
+  </g>
+</svg>
+</g><text x="196" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g filter="url(#grey)">
+<!--
+  Wand — concept A, letterform.
+
+  Construction: a 256 grid, cap height 152 (y=52 to y=204), stroke weight 30,
+  inner joints on a 32 grid, outer edges vertical.
+
+  The W is one outline so the joints are exact. Its middle vertex rises to
+  y=132 — above the baseline, below the cap line — which leaves a notch between
+  the two inner strokes. One square sits in that notch, not on top of it: the
+  tile that is picked out of the row, held by the letter rather than balanced
+  on it.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="238" y="564" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The W: two outer verticals and two inner diagonals meeting at y=132. -->
+    <path d="M28 52 H62 L96 176 L128 120 L160 176 L194 52 H228 L182 204 H150 L128 152 L106 204 H74 L28 52 Z"/>
+    <!-- The picked-out tile, seated in the notch the raised vertex leaves. -->
+    <rect x="112" y="76" width="32" height="32" rx="6" fill="#000000"/>
+  </g>
+</svg>
+</g><text x="246" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="90.0" y="636" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">A · A</text><text x="90.0" y="664" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#161616" letter-spacing="1.5">RECOMMENDED</text><text x="90.0" y="698" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">W with its centre tile lifted</text><rect x="562.667" y="150" width="474.667" height="630" rx="18" fill="#fff" stroke="#e4e4e0" stroke-width="1"/><g filter="url(#grey)">
+<!--
+  Wand — concept B, line.
+
+  Construction: one continuous stroke of weight 26 on a 22 grid, drawn as a
+  single path with round caps and joins. It runs flat, dips to a low vertex,
+  lifts to a high vertex, dips again and finishes flat — the carousel's track,
+  seen edge-on. The high vertex is the selected tile: the one place the line
+  rises above the others.
+
+  No containment, no letterform. It is the motion, not a symbol of the app.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="592.667" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <path d="M32 96 L86 196 L128 96 L170 196 L224 96"
+        stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</g><g filter="url(#grey)">
+<!--
+  Wand — concept B, line.
+
+  Construction: one continuous stroke of weight 26 on a 22 grid, drawn as a
+  single path with round caps and joins. It runs flat, dips to a low vertex,
+  lifts to a high vertex, dips again and finishes flat — the carousel's track,
+  seen edge-on. The high vertex is the selected tile: the one place the line
+  rises above the others.
+
+  No containment, no letterform. It is the motion, not a symbol of the app.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="592.667" y="516" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <path d="M32 96 L86 196 L128 96 L170 196 L224 96"
+        stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</g><text x="624.667" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g filter="url(#grey)">
+<!--
+  Wand — concept B, line.
+
+  Construction: one continuous stroke of weight 26 on a 22 grid, drawn as a
+  single path with round caps and joins. It runs flat, dips to a low vertex,
+  lifts to a high vertex, dips again and finishes flat — the carousel's track,
+  seen edge-on. The high vertex is the selected tile: the one place the line
+  rises above the others.
+
+  No containment, no letterform. It is the motion, not a symbol of the app.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="682.667" y="548" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <path d="M32 96 L86 196 L128 96 L170 196 L224 96"
+        stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</g><text x="698.667" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g filter="url(#grey)">
+<!--
+  Wand — concept B, line.
+
+  Construction: one continuous stroke of weight 26 on a 22 grid, drawn as a
+  single path with round caps and joins. It runs flat, dips to a low vertex,
+  lifts to a high vertex, dips again and finishes flat — the carousel's track,
+  seen edge-on. The high vertex is the selected tile: the one place the line
+  rises above the others.
+
+  No containment, no letterform. It is the motion, not a symbol of the app.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="740.667" y="564" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <path d="M32 96 L86 196 L128 96 L170 196 L224 96"
+        stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</g><text x="748.667" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="592.6666666666667" y="636" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">B · B</text><text x="592.6666666666667" y="670" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">One stroke, the carousel edge-on</text><rect x="1065.33" y="150" width="474.667" height="630" rx="18" fill="#fff" stroke="#e4e4e0" stroke-width="1"/><g filter="url(#grey)">
+<!--
+  Wand — concept C, pictorial.
+
+  Construction: one wand at 45°, held point-up-right. The shaft is a
+  parallel-sided bar of weight 26 with a squared-off end, so it reads as an
+  object rather than a stroke. Its tip carries a four-point glint built from two
+  pointed lozenges crossed at 90°, which stays legible at 16 px where a five-
+  point star collapses.
+
+  A short crossbar near the grip gives it the one detail that makes it a
+  wand rather than a diagonal line: a band, the way a conductor's baton is
+  banded.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1095.33" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The shaft: a bar from grip (lower left) to tip (upper right). -->
+    <path d="M64 200 L74 208 L188 94 L178 84 Z"/>
+    <!-- The band near the grip. -->
+    <path d="M84 180 L108 156 L120 168 L96 192 Z"/>
+    <!-- The glint at the tip: two lozenges crossed at 90°. -->
+    <path d="M190 40 L198 66 L224 74 L198 82 L190 108 L182 82 L156 74 L182 66 Z"/>
+  </g>
+</svg>
+</g><g filter="url(#grey)">
+<!--
+  Wand — concept C, pictorial.
+
+  Construction: one wand at 45°, held point-up-right. The shaft is a
+  parallel-sided bar of weight 26 with a squared-off end, so it reads as an
+  object rather than a stroke. Its tip carries a four-point glint built from two
+  pointed lozenges crossed at 90°, which stays legible at 16 px where a five-
+  point star collapses.
+
+  A short crossbar near the grip gives it the one detail that makes it a
+  wand rather than a diagonal line: a band, the way a conductor's baton is
+  banded.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1095.33" y="516" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The shaft: a bar from grip (lower left) to tip (upper right). -->
+    <path d="M64 200 L74 208 L188 94 L178 84 Z"/>
+    <!-- The band near the grip. -->
+    <path d="M84 180 L108 156 L120 168 L96 192 Z"/>
+    <!-- The glint at the tip: two lozenges crossed at 90°. -->
+    <path d="M190 40 L198 66 L224 74 L198 82 L190 108 L182 82 L156 74 L182 66 Z"/>
+  </g>
+</svg>
+</g><text x="1127.33" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g filter="url(#grey)">
+<!--
+  Wand — concept C, pictorial.
+
+  Construction: one wand at 45°, held point-up-right. The shaft is a
+  parallel-sided bar of weight 26 with a squared-off end, so it reads as an
+  object rather than a stroke. Its tip carries a four-point glint built from two
+  pointed lozenges crossed at 90°, which stays legible at 16 px where a five-
+  point star collapses.
+
+  A short crossbar near the grip gives it the one detail that makes it a
+  wand rather than a diagonal line: a band, the way a conductor's baton is
+  banded.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1185.33" y="548" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The shaft: a bar from grip (lower left) to tip (upper right). -->
+    <path d="M64 200 L74 208 L188 94 L178 84 Z"/>
+    <!-- The band near the grip. -->
+    <path d="M84 180 L108 156 L120 168 L96 192 Z"/>
+    <!-- The glint at the tip: two lozenges crossed at 90°. -->
+    <path d="M190 40 L198 66 L224 74 L198 82 L190 108 L182 82 L156 74 L182 66 Z"/>
+  </g>
+</svg>
+</g><text x="1201.33" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g filter="url(#grey)">
+<!--
+  Wand — concept C, pictorial.
+
+  Construction: one wand at 45°, held point-up-right. The shaft is a
+  parallel-sided bar of weight 26 with a squared-off end, so it reads as an
+  object rather than a stroke. Its tip carries a four-point glint built from two
+  pointed lozenges crossed at 90°, which stays legible at 16 px where a five-
+  point star collapses.
+
+  A short crossbar near the grip gives it the one detail that makes it a
+  wand rather than a diagonal line: a band, the way a conductor's baton is
+  banded.
+-->
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1243.33" y="564" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <g fill="#000000">
+    <!-- The shaft: a bar from grip (lower left) to tip (upper right). -->
+    <path d="M64 200 L74 208 L188 94 L178 84 Z"/>
+    <!-- The band near the grip. -->
+    <path d="M84 180 L108 156 L120 168 L96 192 Z"/>
+    <!-- The glint at the tip: two lozenges crossed at 90°. -->
+    <path d="M190 40 L198 66 L224 74 L198 82 L190 108 L182 82 L156 74 L182 66 Z"/>
+  </g>
+</svg>
+</g><text x="1251.33" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="1095.3333333333335" y="636" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">C · C</text><text x="1095.3333333333335" y="670" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">Banded wand with a glint</text></svg>

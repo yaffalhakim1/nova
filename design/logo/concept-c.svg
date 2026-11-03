@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Wand — concept C, pictorial.
+
+  Construction: one wand at 45°, held point-up-right. The shaft is a
+  parallel-sided bar of weight 26 with a squared-off end, so it reads as an
+  object rather than a stroke. Its tip carries a four-point glint built from two
+  pointed lozenges crossed at 90°, which stays legible at 16 px where a five-
+  point star collapses.
+
+  A short crossbar near the grip gives it the one detail that makes it a
+  wand rather than a diagonal line: a band, the way a conductor's baton is
+  banded.
+-->
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#000000">
+    <!-- The shaft: a bar from grip (lower left) to tip (upper right). -->
+    <path d="M64 200 L74 208 L188 94 L178 84 Z"/>
+    <!-- The band near the grip. -->
+    <path d="M84 180 L108 156 L120 168 L96 192 Z"/>
+    <!-- The glint at the tip: two lozenges crossed at 90°. -->
+    <path d="M190 40 L198 66 L224 74 L198 82 L190 108 L182 82 L156 74 L182 66 Z"/>
+  </g>
+</svg>

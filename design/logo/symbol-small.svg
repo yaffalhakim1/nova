@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Wand, small size</title>
+  <g fill="#000000">
+    <!--
+      The small-size cut, drawn for 16-24 px.
+
+      At that size a 3-vertex W has too many thin gaps, so the letter is
+      simplified the way a type designer cuts a text size:
+      - only two vertices, both wide, so each stroke is a solid mass
+      - the peak stops well below the square, leaving a clear gap
+      - the square is bigger than proportionally correct, because a small
+        square greys out into the background
+      - no stroke is thinner than 32 of 256, which is 2 px at 16
+    -->
+    <path d="M32 44 H76 L100 168 L128 120 L156 168 L180 44 H224 L180 212 H150 L128 172 L106 212 H76 L32 44 Z"/>
+    <rect x="104" y="56" width="48" height="48" rx="8"/>
+  </g>
+</svg>

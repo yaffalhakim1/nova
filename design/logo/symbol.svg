@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Wand</title>
+  <g fill="#000000">
+    <!-- The W: two outer verticals and two inner diagonals meeting at y=132. -->
+    <path d="M28 52 H62 L96 176 L128 120 L160 176 L194 52 H228 L182 204 H150 L128 152 L106 204 H74 L28 52 Z"/>
+    <!-- The picked-out tile, seated in the notch the raised vertex leaves. -->
+    <rect x="112" y="76" width="32" height="32" rx="6"/>
+  </g>
+</svg>

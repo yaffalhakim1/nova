@@ -1,0 +1,19 @@
+# borrowed credential — never commit one
+token.txt
+
+# cached state
+trainer.json
+catalog.json
+library.json
+stats.json
+
+# build output
+nova.exe
+wand.exe
+*.exe
+*.log
+build/
+.mygo/
+
+# editor / OS noise
+.DS_Store
