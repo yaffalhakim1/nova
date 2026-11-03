@@ -128,6 +128,22 @@ img{max-width:100%}
 .rise-3{animation-delay:140ms}
 .rise-4{animation-delay:210ms}
 
+/* stagger on scroll, CSS only: each child of a .stagger group fades up as the
+ * group scrolls into view, 5% of viewport apart, where the browser supports
+ * animation-timeline. Without it the animation never starts and the content
+ * simply shows. */
+@supports (animation-timeline: view()){
+  .stagger>*{animation:rise 640ms var(--ease-out) both;
+    animation-timeline:view();animation-range:entry 0% entry 40%}
+  .stagger>*:nth-child(2){animation-range:entry 5% entry 45%}
+  .stagger>*:nth-child(3){animation-range:entry 10% entry 50%}
+  .stagger>*:nth-child(4){animation-range:entry 15% entry 55%}
+  .stagger>*:nth-child(5){animation-range:entry 20% entry 60%}
+  .stagger>*:nth-child(6){animation-range:entry 25% entry 65%}
+  .stagger>*:nth-child(7){animation-range:entry 30% entry 70%}
+  .stagger>*:nth-child(8){animation-range:entry 35% entry 75%}
+}
+
 /* hero */
 .hero{padding-block:var(--space-sm) 0;text-align:center}
 .hero h1{font-size:clamp(36px,4.6vw,62px);max-width:14ch;margin-inline:auto}
@@ -231,6 +247,7 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .rise{animation:none}
+  .stagger>*{animation:none!important;opacity:1!important;transform:none!important}
   *{transition-duration:.01ms!important}
   *::before{display:none}
   #fx{display:none}
@@ -286,7 +303,7 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
       <div class="sect-head">
         <h2>A library you can read</h2>
         <p>Covers only, nothing under the grid. Filter by genre, sort any way, add what the scan missed.</p>
-        <ul class="facts">
+        <ul class="facts stagger">
           <li>Reads Steam appmanifests in every library folder</li>
           <li>Manual adds keep a relative path, so folders survive a move</li>
           <li>Tools and redistributables never appear</li>
@@ -306,7 +323,7 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
       <div class="sect-head">
         <h2>Trophies, honestly</h2>
         <p>Achievements come from Steam, and rarity comes from the percentages Steam publishes. Nothing is invented to feel like a console.</p>
-        <ul class="facts">
+        <ul class="facts stagger">
           <li>Tiers derived from real global percentages</li>
           <li>Locked rows stay, dimmed, with their rarity</li>
           <li>Play time merges from Steam as max, never summed twice</li>
@@ -318,7 +335,7 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
   <section class="sect keys container" id="keys">
     <h2>Keys, not menus</h2>
     <p class="sub">The whole launcher runs from the keyboard. A gamepad works too.</p>
-    <div class="keyrow">
+    <div class="keyrow stagger">
       <span class="keychip"><kbd>←</kbd><kbd>→</kbd> Browse</span>
       <span class="keychip"><kbd>Enter</kbd> Play</span>
       <span class="keychip"><kbd>↓</kbd> Details</span>
@@ -334,7 +351,7 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
       <h2>Get Nova</h2>
       <p>Windows 10 or newer. Clone it, build it with Go, point it at your games.</p>
       <a class="btn primary" href="https://github.com/yaffalhakim1/nova">View the source on GitHub</a>
-      <div class="plat">
+      <div class="plat stagger">
         <span>Steam manifests</span>
         <span>Manual adds</span>
         <span>Achievements</span>
@@ -360,8 +377,8 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
 <script>
 /* Ambient drift: the same particles the launcher carries behind its games.
  * 46 soft dots rising slowly, brightness breathing on a sine, each with its
- * own phase. Runs on the canvas, off the layout; rAF throttles itself when
- * the tab is hidden, and reduced motion never starts it. */
+ * own phase. Runs on the canvas, off the layout; reduced motion never starts
+ * it, and rAF suspends itself when the tab is hidden. */
 (function(){
   "use strict";
   if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
