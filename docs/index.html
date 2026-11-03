@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;300;400;500;600&display=swap">
+<script>document.documentElement.classList.add("js")</script>
 <style>
 /* Hallmark · v2.0.0
  * shape: try-job landing · job: visit the repo · redesign: user-directed composition, emil-design-eng motion
@@ -128,24 +129,22 @@ img{max-width:100%}
 .rise-3{animation-delay:140ms}
 .rise-4{animation-delay:210ms}
 
-/* stagger on scroll, CSS only: each child of a .stagger group fades up as the
- * group scrolls into view, 5% of viewport apart, where the browser supports
- * animation-timeline. Without it the animation never starts and the content
- * simply shows. */
-@supports (animation-timeline: view()){
-  .stagger>*{animation:rise 640ms var(--ease-out) both;
-    animation-timeline:view();animation-range:entry 0% entry 40%}
-  .stagger>*:nth-child(2){animation-range:entry 5% entry 45%}
-  .stagger>*:nth-child(3){animation-range:entry 10% entry 50%}
-  .stagger>*:nth-child(4){animation-range:entry 15% entry 55%}
-  .stagger>*:nth-child(5){animation-range:entry 20% entry 60%}
-  .stagger>*:nth-child(6){animation-range:entry 25% entry 65%}
-  .stagger>*:nth-child(7){animation-range:entry 30% entry 70%}
-  .stagger>*:nth-child(8){animation-range:entry 35% entry 75%}
-}
+/* stagger on scroll: each child of a .stagger group fades up once, when the
+ * group first enters the viewport, 60ms after its older sibling. The hidden
+ * state is scoped to .js, which a one-line head script adds, so the page
+ * ships fully visible with scripting off. */
+.js .stagger>*{opacity:0;transform:translateY(14px)}
+.js .stagger.in>*{animation:rise 640ms var(--ease-out) forwards}
+.js .stagger.in>*:nth-child(2){animation-delay:60ms}
+.js .stagger.in>*:nth-child(3){animation-delay:120ms}
+.js .stagger.in>*:nth-child(4){animation-delay:180ms}
+.js .stagger.in>*:nth-child(5){animation-delay:240ms}
+.js .stagger.in>*:nth-child(6){animation-delay:300ms}
+.js .stagger.in>*:nth-child(7){animation-delay:360ms}
+.js .stagger.in>*:nth-child(8){animation-delay:420ms}
 
 /* hero */
-.hero{padding-block:var(--space-sm) 0;text-align:center}
+.hero{padding-block:clamp(72px,14vh,128px) 0;text-align:center}
 .hero h1{font-size:clamp(36px,4.6vw,62px);max-width:14ch;margin-inline:auto}
 .hero .sub{margin:var(--space-sm) auto 0;font-size:17px;color:var(--ink-dim);max-width:44ch}
 .hero-actions{display:flex;justify-content:center;align-items:center;gap:var(--space-lg);flex-wrap:wrap;
@@ -247,7 +246,7 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .rise{animation:none}
-  .stagger>*{animation:none!important;opacity:1!important;transform:none!important}
+  .js .stagger>*{opacity:1!important;transform:none!important;animation:none!important}
   *{transition-duration:.01ms!important}
   *::before{display:none}
   #fx{display:none}
@@ -375,6 +374,25 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
 </footer>
 
 <script>
+/* Stagger on scroll: when a .stagger group first enters the viewport it gets
+ * .in, and CSS plays its children's fade-up in sequence. One observer, no
+ * animation while scrolled back up, nothing hidden without scripting. */
+(function(){
+  "use strict";
+  if (!("IntersectionObserver" in window)){
+    document.querySelectorAll(".stagger").forEach(function(el){ el.classList.add("in"); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (!e.isIntersecting) return;
+      e.target.classList.add("in");
+      io.unobserve(e.target);
+    });
+  }, { rootMargin: "0px 0px -15% 0px", threshold: 0.1 });
+  document.querySelectorAll(".stagger").forEach(function(el){ io.observe(el); });
+})();
+
 /* Ambient drift: the same particles the launcher carries behind its games.
  * 46 soft dots rising slowly, brightness breathing on a sine, each with its
  * own phase. Runs on the canvas, off the layout; reduced motion never starts
