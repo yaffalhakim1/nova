@@ -5,37 +5,47 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nova, a native Windows game launcher</title>
 <meta name="description" content="Nova lists the games installed on your machine, pulls real Steam artwork, and starts the game. Built in Go on MyGo, no web view.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@200;300;400;500;600&display=swap">
 <style>
 /* Hallmark · v2.0.0
- * shape: try-job landing · genre: try (desktop tool) · job: visit the repo · posture: stage
- * theme: Nova design system (DESIGN.md, by request) · surface: absolute (system glass on --deep)
- * nav: edge-aligned, wordmark left, links and one action right · footer: colophon
- * hero: Stage, text 4 cols, the real home screen on 8 cols
- * signature: the launcher's own captured screens, framed in the system's glass
- * sections: Hero · Showcase · Rows · Table · Band · Footer
+ * shape: try-job landing · job: visit the repo · redesign: user-directed composition, emil-design-eng motion
+ * theme: Nova design system (DESIGN.md, by request) · font: Hanken Grotesk (v2 design)
+ * hero: centred display head, the real home screen floating beneath, one soft glow
+ * sections: Hero · Showcase · Split (library) · Split (trophies) · Keys · Band · Footer
  * material: real: four product screenshots · absent: quotes, logos, metrics
- * pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: S, a launcher landing is a known shape; led with the app's own captured screens instead of a built mock
- * dismissed 58 · the keys table plus the band head share one 900px window; a key reference is dense by nature, every row is a fact
- * sweep: 0 FAIL · 1 dismissed
- * hero-review: none · finish-review: subagent · 5 findings · 5 resolved · gap: none
+ * dismissed 77 · the close band is a centred buy-box: head, line, action, platform chips; mass lives in the screenshots above it
+ * waived 29 · the nav pill is the app's own glass chrome, the v2 design's nav surface with blur by design
+ * dismissed 58 · the keys row and band share one window; a key reference is dense by nature, every row a fact
+ * sweep: 0 FAIL · 1 waived · 2 dismissed
  */
 :root{
+  --ink:#f4f7ff;
+  --ink-dim:rgba(220,230,255,.62);
+  --ink-faint:rgba(220,230,255,.34);
   --deep:#05070f;
   --well:#0a0e1c;
-  --ink:#f4f7ff;
-  --ink-dim:#b9c4e2;
-  --ink-faint:#8b96b8;
-  --rule:rgba(220,230,255,.14);
   --glass:rgba(255,255,255,.07);
-  --glass-hover:rgba(255,255,255,.14);
+  --glass-strong:rgba(255,255,255,.14);
+  --glass-line:rgba(255,255,255,.14);
+  --nav-glass:rgba(10,14,30,.6);
+  --kbd-bg:rgba(255,255,255,.1);
+  --kbd-line:rgba(255,255,255,.12);
+  --glow-accent:rgba(91,141,255,.14);
+  --glow-band:rgba(91,141,255,.09);
+  --shadow-btn:0 8px 32px rgba(246,248,255,.18);
+  --shadow-deep:0 8px 32px rgba(0,0,0,.35);
+  --shadow-shot:0 30px 80px rgba(0,0,0,.55),0 8px 24px rgba(0,0,0,.4);
+  --shadow-shot-hover:0 40px 90px rgba(0,0,0,.6),0 10px 28px rgba(0,0,0,.45);
+  --accent:#5b8dff;
+  --gold:#ffd36a;
   --bright:#f6f8ff;
   --bright-ink:#080c1a;
-  --accent:#5b8dff;
-  --focus:#f4f7ff;
   --font:"Hanken Grotesk","Segoe UI",system-ui,sans-serif;
 
-  --container:1360px;
-  --gutter:64px;
+  --container:1120px;
+  --gutter:clamp(20px,4vw,40px);
   --space-xs:8px;
   --space-sm:12px;
   --space-md:16px;
@@ -44,19 +54,19 @@
   --space-2xl:64px;
   --space-3xl:96px;
   --space-4xl:144px;
-  --section-a:176px;
-  --section-b:120px;
-  --section-c:144px;
 
   --radius-frame:20px;
   --radius-pill:999px;
-  --dur-short:220ms;
-  --dur-long:420ms;
-  --ease-out:cubic-bezier(.22,1,.36,1);
+  --dur-press:160ms;
+  --dur-hover:220ms;
+  --dur-enter:640ms;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --ease-spring:cubic-bezier(0.22,1.2,0.36,1);
+
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth;scrollbar-color:rgba(220,230,255,.25) var(--deep)}
 html,body{overflow-x:clip}
-html{scrollbar-color:var(--ink-faint) var(--deep)}
 body{
   margin:0;
   background:var(--deep);
@@ -66,241 +76,278 @@ body{
   font-size:17px;
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
 ::selection{background:var(--accent);color:var(--bright-ink)}
-h1,h2,h3{font-weight:200;text-wrap:balance}
-.row h3,.footer .wordmark,.wordmark{font-weight:400}
-p{text-wrap:pretty}
-a{color:var(--ink)}
-:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:8px}
+h1,h2,h3{margin:0;font-weight:200;letter-spacing:-.02em;line-height:1.08;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+a{color:inherit}
+img{max-width:100%}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:10px}
 
 .container{max-width:var(--container);margin-inline:auto;padding-inline:var(--gutter)}
 
-/* nav: edge-aligned */
-.nav{display:flex;align-items:center;justify-content:space-between;gap:var(--space-lg);
-  min-height:80px;padding-block:var(--space-md)}
-.wordmark{font-size:20px;text-decoration:none;letter-spacing:0}
-.nav-links{display:flex;align-items:center;gap:var(--space-lg)}
-.nav-links a{font-size:15px;font-weight:300;color:var(--ink-dim);text-decoration:none;white-space:nowrap}
+/* nav: floating centred pill */
+.nav{position:sticky;top:var(--space-md);z-index:50;display:flex;justify-content:center;
+  padding-inline:var(--gutter)}
+.nav-pill{display:flex;align-items:center;gap:var(--space-lg);
+  padding:var(--space-sm) var(--space-sm) var(--space-sm) var(--space-lg);
+  border-radius:var(--radius-pill);
+  background:var(--nav-glass);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:inset 0 0 0 1px var(--glass-line),var(--shadow-deep)}
+.wordmark{font-size:17px;text-decoration:none}
+.nav-links{display:flex;align-items:center;gap:var(--space-md)}
+.nav-links a{font-size:14px;font-weight:400;color:var(--ink-dim);text-decoration:none;
+  padding:var(--space-xs) var(--space-sm);border-radius:var(--radius-pill);
+  transition:color var(--dur-hover) var(--ease-out)}
 .nav-links a:hover{color:var(--ink)}
-.nav-links a.nav-cta{color:var(--ink);background:var(--glass);box-shadow:inset 0 0 0 1px var(--rule);padding:var(--space-xs) var(--space-lg);border-radius:var(--radius-pill)}
-.nav-links a.nav-cta:hover{transform:translateY(-1px)}
-.nav-links a.nav-cta:active,.btn:active{transform:translateY(1px)}
+.nav-cta{font-size:14px;color:var(--bright-ink)!important;background:var(--bright);
+  padding:var(--space-xs) var(--space-md)!important;border-radius:var(--radius-pill);
+  transition:transform var(--dur-press) var(--ease-out)}
+.nav-cta:hover{transform:translateY(-1px)}
+.nav-cta:active{transform:scale(0.97)}
 
-/* buttons: one primary recipe, one glass recipe */
+/* buttons */
 .btn{display:inline-flex;align-items:center;gap:var(--space-sm);text-decoration:none;white-space:nowrap;
   font-size:16px;border-radius:var(--radius-pill);padding:var(--space-sm) 36px;
-  transition:transform var(--dur-short) var(--ease-out),background var(--dur-short) var(--ease-out)}
+  transition:transform var(--dur-press) var(--ease-out),background var(--dur-hover) var(--ease-out),
+    box-shadow var(--dur-hover) var(--ease-out)}
+.btn:active{transform:scale(0.97)}
 .btn.primary{background:var(--bright);color:var(--bright-ink)}
-.btn.primary:hover,.btn.primary:focus-visible{transform:scale(1.03)}
-.btn.ghost{background:var(--glass);color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
-.btn.ghost:hover{background:var(--glass-hover)}
-.ghost-link{font-size:16px;font-weight:400;color:var(--ink-dim);text-decoration:underline;text-underline-offset:4px}
-.ghost-link:hover{color:var(--ink)}
+.btn.primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-btn)}
+.btn.primary:hover:active{transform:scale(0.97)}
+.btn.ghost{background:var(--glass);color:var(--ink);box-shadow:inset 0 0 0 1px var(--glass-line)}
+.btn.ghost:hover{background:var(--glass-strong)}
 
-/* hero: stage */
-.hero{min-height:calc(100svh - 80px);display:grid;align-content:center;
-  padding-block:var(--space-2xl)}
-.hero-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);
-  gap:var(--space-3xl);align-items:center}
-.hero .slot img{display:block;width:100%;height:auto}
-.hero h1{margin:0 0 var(--space-lg);font-size:clamp(44px,6vw,84px);line-height:1.05;letter-spacing:-.01em;max-width:12ch}
-.hero .lead{margin:0 0 var(--space-xl);font-size:19px;color:var(--ink-dim);max-width:44ch}
-.hero-actions{display:flex;gap:var(--space-md);flex-wrap:wrap;align-items:center}
-.slot{margin:0;position:relative;border-radius:var(--radius-frame);overflow:hidden;
-  background:var(--well)}
-.slot img{display:block;width:100%;height:auto}
+/* entrance: staggered fade-up, visible without animation */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.rise{animation:rise var(--dur-enter) var(--ease-out) backwards}
+.rise-2{animation-delay:70ms}
+.rise-3{animation-delay:140ms}
+.rise-4{animation-delay:210ms}
 
-/* showcase */
-.screens{padding-block:var(--section-c) 0}
-.screens h2,.how h2,.keys h2{margin:0 0 var(--space-md);font-size:clamp(34px,3.4vw,48px);letter-spacing:-.01em}
-.screens .secline{margin:0 0 var(--space-2xl);color:var(--ink-dim);max-width:52ch}
-.screens .lead-shot{margin:var(--space-lg) 0 var(--space-md)}
-.screens .pair{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--space-lg)}
-figure{margin:0}
-figcaption{margin-top:var(--space-sm);font-size:14px;font-weight:300;color:var(--ink-dim);
-  padding-inline:var(--space-sm) var(--space-sm) var(--space-xs)}
-.screens .lead-shot,.pair .slot{background:transparent;border-radius:0;overflow:visible}
-.screens .lead-shot::after,.pair .slot::after{display:none}
-.screens .lead-shot img,.pair .slot img{border-radius:var(--radius-frame);box-shadow:inset 0 0 0 1px var(--rule)}
-.slot{position:relative}
-.slot::after{content:"";position:absolute;inset:0;border-radius:var(--radius-frame);
-  box-shadow:inset 0 0 0 1px var(--rule);pointer-events:none}
+/* hero */
+.hero{padding-block:var(--space-lg) 0;text-align:center}
+.hero h1{font-size:clamp(38px,5vw,68px);max-width:14ch;margin-inline:auto}
+.hero .sub{margin:var(--space-md) auto 0;font-size:18px;color:var(--ink-dim);max-width:44ch}
+.hero-actions{display:flex;justify-content:center;align-items:center;gap:var(--space-lg);flex-wrap:wrap;
+  margin-top:var(--space-lg)}
+.ghost-link{font-size:15px;font-weight:400;color:var(--ink-dim);
+  text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--ink-faint);
+  transition:color var(--dur-hover) var(--ease-out)}
+.ghost-link:hover{color:var(--ink);text-decoration-color:var(--ink)}
 
-/* rows */
-section{scroll-margin-top:var(--space-2xl)}
-.how{padding-block:var(--section-a)}
-.how-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:var(--space-2xl);align-items:start}
-.how-grid h2{margin-bottom:0}
-.rows{border-top:1px solid var(--rule)}
-.row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--space-lg);
-  padding-block:var(--space-lg);border-bottom:1px solid var(--rule)}
-.row h3{margin:0;font-size:22px}
-.row p{margin:0;color:var(--ink-dim);max-width:52ch}
+/* hero shot: the product, floating on one soft glow; capped so the hero is one screen */
+.hero-shot{margin-top:var(--space-2xl);position:relative}
+.hero-shot::before{content:"";position:absolute;inset:-8% -12% -20%;
+  background:radial-gradient(52% 46% at 50% 42%,var(--glow-accent),transparent 70%);
+  pointer-events:none}
+.hero-shot .shot img{aspect-ratio:21/9;object-fit:cover;object-position:50% 42%}
+.shot{position:relative;margin:0;border-radius:var(--radius-frame);overflow:hidden;
+  background:var(--well);box-shadow:var(--shadow-shot)}
+.shot::after{content:"";position:absolute;inset:0;border-radius:var(--radius-frame);
+  box-shadow:inset 0 0 0 1px var(--glass-line);pointer-events:none}
+.shot img{display:block;width:100%;height:auto}
 
-/* keys table */
-.keys{padding-block:var(--section-b)}
-.keys .secline{margin:0 0 var(--space-2xl);color:var(--ink-dim)}
-.keytable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.keytable th{font-size:14px;font-weight:400;color:var(--ink-dim);text-align:left;
-  padding:0 var(--space-md) var(--space-sm) 0;border-bottom:1px solid var(--rule)}
-.keytable td{padding:var(--space-md) var(--space-md) var(--space-md) 0;
-  border-bottom:1px solid var(--rule);font-size:16px}
-.keytable td:first-child{white-space:nowrap}
-.keytable .what{color:var(--ink-dim)}
-kbd{font:inherit;font-weight:400;font-size:14px;color:var(--ink);
-  background:var(--glass);box-shadow:inset 0 0 0 1px var(--rule);
-  border-radius:6px;padding:2px var(--space-xs);margin-right:var(--space-xs)}
+/* sections */
+section{scroll-margin-top:96px}
+.sect{padding-block:var(--space-4xl)}
+.sect-head{max-width:56ch}
+.sect-head h2{font-size:clamp(30px,3.6vw,44px)}
+.sect-head p{margin-top:var(--space-md);color:var(--ink-dim);font-size:17px}
+
+/* showcase: full-width game page */
+.shot-cap{margin-top:var(--space-md);font-size:14px;font-weight:300;color:var(--ink-faint);
+  display:flex;justify-content:space-between;gap:var(--space-lg);flex-wrap:wrap}
+
+/* split sections, alternating */
+.split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);
+  gap:var(--space-2xl);align-items:center}
+.split.flip{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.split .sect-head{align-self:center}
+.facts{margin:var(--space-lg) 0 0;padding:0;list-style:none;display:grid;gap:var(--space-sm)}
+.facts li{display:flex;gap:var(--space-sm);align-items:baseline;color:var(--ink-dim);font-size:15px}
+.facts li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;
+  background:var(--ink-faint);translate:0 -2px}
+.frame-hover{transition:transform var(--dur-hover) var(--ease-spring),box-shadow var(--dur-hover) var(--ease-out)}
+@media (hover:hover) and (pointer:fine){
+  .frame-hover:hover{transform:translateY(-4px);box-shadow:var(--shadow-shot-hover)}
+}
+
+/* keys */
+.keys{text-align:center}
+.keys h2{font-size:clamp(30px,3.6vw,44px)}
+.keys .sub{margin:var(--space-md) auto 0;color:var(--ink-dim);max-width:40ch}
+.keyrow{display:flex;justify-content:center;gap:var(--space-sm) var(--space-md);flex-wrap:wrap;
+  margin-top:var(--space-2xl)}
+.keychip{display:inline-flex;align-items:center;gap:var(--space-sm);
+  padding:var(--space-sm) var(--space-md);border-radius:14px;
+  background:var(--glass);box-shadow:inset 0 0 0 1px var(--glass-line);
+  font-size:14px;font-weight:400;color:var(--ink-dim);
+  transition:transform var(--dur-press) var(--ease-out),background var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out)}
+@media (hover:hover) and (pointer:fine){
+  .keychip:hover{transform:translateY(-2px);background:var(--glass-strong);color:var(--ink)}
+}
+kbd{font:inherit;font-size:13px;color:var(--ink);
+  background:var(--kbd-bg);border-radius:6px;padding:2px var(--space-xs);
+  box-shadow:inset 0 -1px 0 var(--kbd-line)}
 
 /* band */
-.band{background:var(--well);border-block:1px solid var(--rule);padding-block:var(--space-3xl);color:var(--ink)}
-.band-inner{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:var(--space-2xl);align-items:center}
-.band h2{margin:0 0 var(--space-md);font-size:clamp(38px,4vw,56px);letter-spacing:-.01em}
-.band p{margin:0;color:var(--ink-dim);max-width:44ch}
-.band-actions{display:flex;flex-direction:column;gap:var(--space-md);align-items:flex-start}
-.band .small{margin:0;font-size:14px;color:var(--ink-faint)}
-.band .small a{color:var(--ink-dim)}
+.band{border-block:1px solid var(--glass-line);
+  background:radial-gradient(70% 90% at 50% 115%,var(--glow-band),transparent 70%),var(--well)}
+.band-inner{text-align:center;padding-block:var(--space-3xl)}
+.band h2{font-size:clamp(34px,4.4vw,56px)}
+.band p{margin:var(--space-md) auto 0;color:var(--ink-dim);max-width:44ch}
+.band .btn{margin-top:var(--space-xl)}
+.band .plat{margin-top:var(--space-2xl);display:flex;justify-content:center;gap:var(--space-sm) var(--space-md);
+  flex-wrap:wrap;font-size:14px;color:var(--ink-dim)}
+.band .plat span{display:inline-flex;align-items:center;gap:var(--space-xs);
+  padding:var(--space-xs) var(--space-md);border-radius:var(--radius-pill);
+  background:var(--glass);box-shadow:inset 0 0 0 1px var(--glass-line)}
+.band .tiny{margin-top:var(--space-lg);font-size:13px;color:var(--ink-faint)}
+.band .tiny a{color:var(--ink-dim);text-decoration:none}
+.band .tiny a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 
 /* footer */
 .footer{padding-block:var(--space-2xl)}
-.footer-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--space-2xl);align-items:start}
-.footer .wordmark{font-size:24px}.footer-note{margin:var(--space-md) 0 0;color:var(--ink-dim);max-width:48ch}
-.footer-links{display:grid;gap:var(--space-xs);justify-items:start}
-.footer-links a{font-size:15px;font-weight:400;color:var(--ink-dim);text-decoration:none}
-.footer-links a:hover{color:var(--ink);text-decoration:underline}
-.footer .legal{margin-top:var(--space-2xl);padding-top:var(--space-lg);border-top:1px solid var(--rule);
-  font-size:14px;color:var(--ink-faint)}
+.footer-row{display:flex;justify-content:space-between;gap:var(--space-lg);flex-wrap:wrap;align-items:baseline}
+.footer-links{display:flex;gap:var(--space-lg)}
+.footer-links a{font-size:14px;font-weight:400;color:var(--ink-dim);text-decoration:none}
+.footer-links a:hover{color:var(--ink)}
+.legal{margin-top:var(--space-lg);font-size:13px;color:var(--ink-faint);max-width:64ch}
 
-@media (max-width:60rem){
-  .hero-grid,.screens .pair,.how-grid,.band-inner,.footer-grid{grid-template-columns:minmax(0,1fr)}
-  .hero{min-height:0}
-  .how-grid{gap:var(--space-xl)}
-  .row{grid-template-columns:minmax(0,1fr);gap:var(--space-xs)}
-  .nav{flex-wrap:wrap}
-  .nav-links{gap:var(--space-md)}
+@media (max-width:56rem){
+  .split,.split.flip{grid-template-columns:minmax(0,1fr)}
+  .split.flip .shot{order:-1}
   .nav-links a:not(.nav-cta){display:none}
-  .container{padding-inline:var(--space-lg)}
+  .sect{padding-block:var(--space-3xl)}
 }
 @media (prefers-reduced-motion:reduce){
-  *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  .rise{animation:none}
+  *{transition-duration:.01ms!important}
+  *::before{display:none}
 }
 </style>
 </head>
 <body>
 
-<header class="container nav">
-  <a class="wordmark" href="#top">Nova</a>
-  <nav class="nav-links" aria-label="Page">
-    <a href="#screens">Screens</a>
-    <a href="#how">How it works</a>
-    <a class="nav-cta" href="https://github.com/yaffalhakim1/nova">Get it on GitHub</a>
+<header class="nav">
+  <nav class="nav-pill" aria-label="Main">
+    <a class="wordmark" href="#top">Nova</a>
+    <div class="nav-links">
+      <a href="#screens">Screens</a>
+      <a href="#keys">Keys</a>
+      <a class="nav-cta" href="https://github.com/yaffalhakim1/nova">GitHub</a>
+    </div>
   </nav>
 </header>
 
 <main id="top">
   <section class="hero container" aria-label="Nova">
-    <div class="hero-grid">
-      <div>
-        <h1>Your games, one console away</h1>
-        <p class="lead">Nova lists what is installed and starts the game.</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="https://github.com/yaffalhakim1/nova">Get it on GitHub</a>
-          <a class="ghost-link" href="#screens">See the screens</a>
-        </div>
-      </div>
-      <figure class="slot">
+    <h1 class="rise">Your games, one console away</h1>
+    <p class="sub rise rise-2">Nova lists what is installed and starts the game in Steam artwork.</p>
+    <div class="hero-actions rise rise-3">
+      <a class="btn primary" href="https://github.com/yaffalhakim1/nova">Get it on GitHub</a>
+      <a class="ghost-link" href="#screens">See the screens</a>
+    </div>
+    <figure class="hero-shot rise rise-4">
+      <div class="shot frame-hover">
         <img src="screenshots/home.png" alt="The Nova home screen: a carousel of game covers with Cyberpunk 2077 selected" width="1440" height="900" fetchpriority="high">
-      </figure>
-    </div>
-  </section>
-
-  <section class="screens container" id="screens">
-    <h2>Every screen, one look</h2>
-    <p class="secline">The window takes its colour from the game you select, and the artwork comes from Steam, cached on disk.</p>
-    <figure class="lead-shot slot">
-      <img src="screenshots/detail.png" alt="A game page with full-bleed artwork, achievements, play time and screenshots" width="1440" height="900" loading="lazy">
-      <figcaption>The game page: store artwork fills the screen, the cards carry achievements, play time and info.</figcaption>
+      </div>
     </figure>
-    <div class="pair">
-      <figure class="slot">
+  </section>
+
+  <section class="sect container" id="screens">
+    <div class="sect-head">
+      <h2>The game is the interface</h2>
+      <p>Open a game and its own artwork fills the page. Everything the launcher knows about it sits in cards over the art.</p>
+    </div>
+    <figure class="shot frame-hover" style="margin-top:var(--space-2xl)">
+      <img src="screenshots/detail.png" alt="A game page with full-bleed artwork, achievements, play time and screenshots" width="1440" height="900" loading="lazy">
+    </figure>
+    <figcaption class="shot-cap">
+      <span>The Witcher 3, page one.</span>
+      <span>Trophies, activity, sessions, info, screenshots, about.</span>
+    </figcaption>
+  </section>
+
+  <section class="sect container">
+    <div class="split">
+      <div class="sect-head">
+        <h2>A library you can read</h2>
+        <p>Covers only, nothing under the grid. Filter by genre, sort any way, add what the scan missed.</p>
+        <ul class="facts">
+          <li>Reads Steam appmanifests in every library folder</li>
+          <li>Manual adds keep a relative path, so folders survive a move</li>
+          <li>Tools and redistributables never appear</li>
+        </ul>
+      </div>
+      <figure class="shot frame-hover">
         <img src="screenshots/library.png" alt="The library grid with genre chips and a sort select" width="1440" height="900" loading="lazy">
-        <figcaption>The library grid, filtered by genre chips and sorted any way.</figcaption>
-      </figure>
-      <figure class="slot">
-        <img src="screenshots/trophies.png" alt="The trophies dialog listing achievements with rarity percentages" width="1440" height="900" loading="lazy" style="aspect-ratio:16/7;object-fit:cover;object-position:50% 78%">
-        <figcaption>Trophies with real rarity, worked out from the percentages Steam publishes.</figcaption>
       </figure>
     </div>
   </section>
 
-  <section class="how container" id="how">
-    <div class="how-grid">
-      <h2>What happens under the hood</h2>
-      <div class="rows">
-        <div class="row">
-          <h3>Finds your Steam games</h3>
-          <p>Reads every library’s appmanifest files and skips the tools.</p>
-        </div>
-        <div class="row">
-          <h3>Adds the rest by hand</h3>
-          <p>Point it at a folder. The relative path survives a move.</p>
-        </div>
-        <div class="row">
-          <h3>Launches cleanly</h3>
-          <p>From the game’s own folder, with no console window.</p>
-        </div>
-        <div class="row">
-          <h3>Keeps honest play time</h3>
-          <p>Imports what Steam recorded and merges as max, so nothing counts twice.</p>
-        </div>
+  <section class="sect container">
+    <div class="split flip">
+      <figure class="shot frame-hover">
+        <img src="screenshots/trophies.png" alt="The trophies dialog listing achievements with rarity percentages" width="1440" height="900" loading="lazy" style="aspect-ratio:16/10;object-fit:cover;object-position:50% 80%">
+      </figure>
+      <div class="sect-head">
+        <h2>Trophies, honestly</h2>
+        <p>Achievements come from Steam, and rarity comes from the percentages Steam publishes. Nothing is invented to feel like a console.</p>
+        <ul class="facts">
+          <li>Tiers derived from real global percentages</li>
+          <li>Locked rows stay, dimmed, with their rarity</li>
+          <li>Play time merges from Steam as max, never summed twice</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="keys container" id="keys">
+  <section class="sect keys container" id="keys">
     <h2>Keys, not menus</h2>
-    <p class="secline">Runs from the keyboard; a gamepad works too.</p>
-    <table class="keytable">
-      <thead>
-        <tr><th scope="col">Key</th><th scope="col">What it does</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><kbd>←</kbd><kbd>→</kbd></td><td class="what">Choose a game</td></tr>
-        <tr><td><kbd>Enter</kbd></td><td class="what">Play it</td></tr>
-        <tr><td><kbd>Esc</kbd></td><td class="what">Go back</td></tr>
-        <tr><td><kbd>/</kbd></td><td class="what">Search</td></tr>
-        <tr><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></td><td class="what">Home, Favorites, Library</td></tr>
-      </tbody>
-    </table>
+    <p class="sub">The whole launcher runs from the keyboard. A gamepad works too.</p>
+    <div class="keyrow">
+      <span class="keychip"><kbd>←</kbd><kbd>→</kbd> Browse</span>
+      <span class="keychip"><kbd>Enter</kbd> Play</span>
+      <span class="keychip"><kbd>↓</kbd> Details</span>
+      <span class="keychip"><kbd>F</kbd> Favorite</span>
+      <span class="keychip"><kbd>/</kbd> Search</span>
+      <span class="keychip"><kbd>N</kbd> Add</span>
+      <span class="keychip"><kbd>Esc</kbd> Back</span>
+    </div>
   </section>
 
   <section class="band" aria-label="Get Nova">
     <div class="container band-inner">
-      <div>
-        <h2>Get Nova</h2>
-        <p>Windows 10 or newer, built from source with Go. Clone it, build it, point it at your games.</p>
+      <h2>Get Nova</h2>
+      <p>Windows 10 or newer. Clone it, build it with Go, point it at your games.</p>
+      <a class="btn primary" href="https://github.com/yaffalhakim1/nova">View the source on GitHub</a>
+      <div class="plat">
+        <span>Steam manifests</span>
+        <span>Manual adds</span>
+        <span>Achievements</span>
+        <span>Play time</span>
+        <span>Gamepad</span>
       </div>
-      <div class="band-actions">
-        <a class="btn primary" href="https://github.com/yaffalhakim1/nova">View the source on GitHub</a>
-        <p class="small">Built on <a href="https://github.com/egoist/mygo">MyGo</a>. The interface font is Hanken Grotesk, under the SIL Open Font License.</p>
-      </div>
+      <p class="tiny">Built on <a href="https://github.com/egoist/mygo">MyGo</a>. Type set in Hanken Grotesk.</p>
     </div>
   </section>
 </main>
 
 <footer class="footer container">
-  <div class="footer-grid">
-    <div>
-      <span class="wordmark">Nova</span>
-      <p class="footer-note">A personal project. Game names, artwork and descriptions belong to the games they describe.</p>
-    </div>
+  <div class="footer-row">
+    <span class="wordmark">Nova</span>
     <nav class="footer-links" aria-label="Footer">
       <a href="https://github.com/yaffalhakim1/nova">Source</a>
       <a href="https://github.com/egoist/mygo">MyGo</a>
-      <a href="https://github.com/yafit/nova#license">License notes</a>
     </nav>
   </div>
-  <p class="legal">Nova runs on this machine and reads Steam’s public store data. It sends your Steam Web API key to Steam and nowhere else.</p>
+  <p class="legal">A personal project. Game names, artwork and descriptions belong to the games they describe. Nova runs on this machine, reads Steam’s public store data, and sends your Steam Web API key to Steam and nowhere else.</p>
 </footer>
 
 </body>
