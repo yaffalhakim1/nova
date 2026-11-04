@@ -181,6 +181,30 @@ internal/app                 the whole interface
 - Anything that writes a file must do it synchronously: a background write
   outlives `t.TempDir` and races its cleanup.
 
+## The landing page
+
+`docs/index.html` is a single static page that GitHub Pages serves from `docs/`.
+Its hero plays `docs/media/tour.mp4`: a nine second silent loop of the real
+launcher, made by `TestFilmTour` (`internal/app/film_test.go`). That test drives
+the app through `ui.NewTester` and pipes the frames to ffmpeg. The page has no
+build step and no framework.
+
+The clip's poster is its own first frame, so nothing jumps when playback starts.
+The clip loops while it is on screen and pauses when it is not. A visitor who
+asks for reduced motion keeps the poster and the clip never plays.
+
+Rebuild the clip when the interface changes:
+
+```
+$env:STEAM_API_KEY="..."; $env:STEAM_ID="..."
+$env:NOVA_FILM="docs\media\tour.mp4"
+go test ./internal/app -run TestFilmTour -v -timeout 900s
+ffmpeg -y -i docs\media\tour.mp4 -frames:v 1 -q:v 3 docs\media\tour-poster.jpg
+```
+
+Without `NOVA_FILM` the test skips, so `go test ./...` never encodes video. The
+achievements are real, so the clip needs the key and the account.
+
 ## Commands
 
 ```

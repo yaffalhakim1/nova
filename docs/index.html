@@ -160,6 +160,16 @@ img{max-width:100%}
   background:radial-gradient(52% 46% at 50% 42%,var(--glow-accent),transparent 70%);
   pointer-events:none}
 
+/* The clip is the hero: the real launcher, filmed through its own renderer, not a
+ * mock-up. It loops, it is silent, and it carries no controls, so the heading above
+ * stays the only thing to read.
+ *
+ * Its poster is the clip's own first frame, so nothing jumps when playback starts:
+ * the picture on screen before the first frame is the picture at frame one. A
+ * browser that cannot decode the codec, or a visitor who asked for less motion,
+ * keeps that still, and no empty box is ever shown where the product should be. */
+.shot video{display:block;width:100%;height:auto;background:var(--well)}
+
 /* ambient drift: the app's own particles, on the page */
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 main,header.nav,footer{position:relative;z-index:1}
@@ -273,7 +283,9 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
     </div>
     <figure class="hero-shot rise rise-4">
       <div class="shot frame-hover">
-        <img src="screenshots/home.png" alt="The Nova home screen: a carousel of game covers with Cyberpunk 2077 selected" width="1440" height="900" fetchpriority="high">
+        <video src="media/tour.mp4" poster="media/tour-poster.jpg" width="1440" height="900"
+               autoplay muted loop playsinline preload="auto" tabindex="-1"
+               aria-label="A silent tour of Nova: the carousel moves to Cyberpunk 2077, its page opens, and the trophy list scrolls"></video>
       </div>
     </figure>
   </section>
@@ -369,6 +381,36 @@ kbd{font:inherit;font-size:13px;color:var(--ink);
 </footer>
 
 <script>
+/* The hero clip loops while the page is on screen, and stops when it is not: a
+ * video decoding behind three screens of scrolling is a battery cost for nothing.
+ *
+ * The clip carries the tour in its aria-label, so it is not hidden from assistive
+ * technology, and it takes no focus: there is nothing to activate. Reduced motion
+ * never plays it, and the poster frame stays. */
+(function(){
+  "use strict";
+  var v = document.querySelector(".hero-shot video");
+  if (!v) return;
+
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){
+    v.removeAttribute("autoplay");
+    v.pause();
+    return;
+  }
+
+  if (!("IntersectionObserver" in window)) return;
+  new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        var p = v.play();
+        if (p && p.catch) p.catch(function(){ /* the poster stays */ });
+      } else {
+        v.pause();
+      }
+    });
+  }, { threshold: 0.05 }).observe(v);
+})();
+
 /* Stagger on scroll: when a .stagger group first enters the viewport it gets
  * .in, and CSS plays its children's fade-up in sequence. One observer, no
  * animation while scrolled back up, nothing hidden without scripting. */
