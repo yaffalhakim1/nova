@@ -1,9 +1,12 @@
 # Nova
 
+
 A native Windows **game launcher**. It lists the games on your machine and starts
 them.
 
 ![The home screen](docs/screenshots/home.png)
+
+[![Listed on Awesome MyGo](https://awesomemygo.dev/badge.svg)](https://awesomemygo.dev/apps/nova)
 
 Nova reads Steam's app manifests, scans any games folder you point it at, and
 picks up the games you add by hand. Each one gets the cover, description and
