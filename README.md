@@ -1,5 +1,7 @@
 # Nova
 
+[![Listed on Awesome MyGo](https://awesomemygo.dev/badge.svg)](https://awesomemygo.dev/apps/nova)
+
 
 A native Windows **game launcher**. It lists the games on your machine and starts
 them.
