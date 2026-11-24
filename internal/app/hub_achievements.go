@@ -7,6 +7,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	"github.com/yafit/nova/internal/gse"
 	steamstore "github.com/yafit/nova/internal/steam"
 )
 
@@ -50,7 +51,24 @@ type gameTrophies struct {
 	// Steam answered.
 	rarity    map[string]float64
 	hasRarity bool
+	// source is where the list came from. A local save is reread while its page
+	// is open; Steam's answer is not.
+	source trophySource
+	// checked is when a local save was last read.
+	checked time.Time
 }
+
+// trophySource says which of the two achievement sources answered.
+type trophySource int
+
+const (
+	sourceSteam trophySource = iota
+	sourceLocal
+)
+
+// localTrophyRefresh is how often an open page rereads a local save. An unlock
+// written by the game then appears within seconds, without restarting Nova.
+const localTrophyRefresh = 5 * time.Second
 
 // earned is how many of the game's achievements this account has.
 func (g *gameTrophies) earned() int {
@@ -111,6 +129,9 @@ func (a *app) trophiesFor(e entry) *gameTrophies {
 	slug := e.slug()
 
 	if g := a.trophiesLoaded(slug); g != nil {
+		if g.source == sourceLocal && time.Since(g.checked) > localTrophyRefresh {
+			a.refreshLocalTrophies(e)
+		}
 		return g
 	}
 
@@ -118,42 +139,96 @@ func (a *app) trophiesFor(e entry) *gameTrophies {
 	return a.trophiesLoaded(slug)
 }
 
-// loadTrophies fetches a game's achievements and their rarity in the background,
-// as the owned library does: without a key, an account or an app id it does
-// nothing at all, and the card keeps its empty state.
-func (a *app) loadTrophies(e entry) {
-	slug := e.slug()
-
-	// A repack has no manifest id, so the id Steam was asked for by name is the
-	// one to use. Until it is known, nothing is started, and a later frame that
-	// has it begins the load.
-	id := e.inst.AppID
-	if id == "" {
-		id = a.appIDString(e)
+// trophyAppID is the id to ask about. A repack has no manifest id, so its
+// steam_appid.txt comes before the store search, which may not have answered.
+func (a *app) trophyAppID(e entry) string {
+	if e.inst.AppID != "" {
+		return e.inst.AppID
 	}
-	key := a.steamKey
-	steamID := a.steamAccountID()
-	if id == "" || key == "" || steamID == "" {
+	if id := gse.AppID(e.inst.Dir); id != "" {
+		return id
+	}
+	return a.appIDString(e)
+}
+
+// refreshLocalTrophies rereads a local save when enough time has passed. The
+// check and the stamp happen together so a frame cannot start two reads.
+func (a *app) refreshLocalTrophies(e entry) {
+	a.mu.Lock()
+	g := a.achievements.games[e.slug()]
+	if g == nil || g.source != sourceLocal || time.Since(g.checked) < localTrophyRefresh {
+		a.mu.Unlock()
+		return
+	}
+	g.checked = time.Now()
+	a.mu.Unlock()
+
+	id := a.trophyAppID(e)
+	if id == "" {
+		return
+	}
+	a.readLocalTrophies(e.slug(), id, a.steamKey)
+}
+
+// readLocalTrophies maps the emulator's records onto the same achievement type
+// the Steam card uses, so the ring, rows and full list need no other changes.
+func (a *app) readLocalTrophies(slug, id, key string) {
+	records, ok := gse.Read(a.gseRoot, id)
+	if !ok {
+		a.update(func() { a.putLocalTrophies(slug, nil, nil, false) })
 		return
 	}
 
-	if !a.markTrophiesStarted(slug) {
+	defs := map[string]steamstore.SchemaEntry{}
+	if key != "" && a.store != nil {
+		defs, _ = a.store.Schema(key, id)
+	}
+	list := make([]steamstore.Achievement, 0, len(records))
+	for _, rec := range records {
+		def := defs[rec.APIName]
+		list = append(list, steamstore.Achievement{
+			APIName:     rec.APIName,
+			Name:        def.Name,
+			Description: def.Description,
+			Achieved:    rec.Achieved,
+			Unlocked:    rec.Unlocked,
+		})
+	}
+	rarity, hasRarity := a.store.Rarity(id)
+	a.update(func() { a.putLocalTrophies(slug, list, rarity, hasRarity) })
+}
+
+// loadTrophies fetches a game's achievements in the background, as the owned
+// library does: without an app id it does nothing at all, and the card keeps its
+// empty state. Steam is asked first; a local emulator's save is the fallback.
+func (a *app) loadTrophies(e entry) {
+	slug := e.slug()
+	id := a.trophyAppID(e)
+	key, steamID := a.steamKey, a.steamAccountID()
+	if id == "" || !a.markTrophiesStarted(slug) {
 		return
 	}
 
 	go func() {
-		list, ok := a.store.Achievements(context.Background(), key, steamID, id)
-		if !ok {
-			a.update(func() {
-				// Recorded as answered so the card does not retry every frame;
-				// an empty game reads as no data, which is what the card says.
-				a.putTrophies(slug, nil, nil, false)
-			})
-			return
+		if key != "" && steamID != "" {
+			list, ok := a.store.Achievements(context.Background(), key, steamID, id)
+			if ok && len(list) > 0 {
+				rarity, hasRarity := a.store.Rarity(id)
+				a.update(func() { a.putTrophies(slug, list, rarity, hasRarity) })
+				return
+			}
 		}
-		rarity, hasRarity := a.store.Rarity(id)
-		a.update(func() { a.putTrophies(slug, list, rarity, hasRarity) })
+		a.readLocalTrophies(slug, id, key)
 	}()
+}
+
+// putLocalTrophies records an answer read from a local save. It runs on the
+// window's own goroutine, through update, like the Steam answer above.
+func (a *app) putLocalTrophies(slug string, list []steamstore.Achievement, rarity map[string]float64, hasRarity bool) {
+	a.setTrophies(slug, &gameTrophies{
+		list: list, rarity: rarity, hasRarity: hasRarity,
+		source: sourceLocal, checked: time.Now(),
+	})
 }
 
 // putTrophies records a finished load. It runs on the window's own goroutine,

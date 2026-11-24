@@ -10,16 +10,17 @@ machine and starts them. It does not mod them, patch them, or touch their
 memory. That is the whole product; anything that smells like a trainer does not
 belong here.
 
-Built on **MyGo** (`github.com/egoist/mygo`, `ui` package). Native UI only: no
-web view, no HTML, no CSS. `go.mod` has
-`replace github.com/egoist/mygo => ../mygo`, so the toolkit source is readable
-at `Y:\Learn\Go\mygo`.
+Built on **MyGo** (`github.com/egoist/mygo`, `ui` package), used as a versioned
+upstream module. Native UI only: no web view, no HTML, no CSS. There is no local
+replacement; read the toolkit source in the Go module cache or at
+`https://github.com/egoist/mygo`.
 
 ## Hard rules
 
 - **The MyGo skill is always on.** Any UI question starts with `docs/ui/*.md`
-  in the sibling checkout and the gallery at `examples/gallery`. Never guess an
-  API, never hand-roll a widget that `ui` already ships.
+  and `examples/gallery` in upstream MyGo at `https://github.com/egoist/mygo`.
+  Read the docs for the version pinned in `go.mod`. Never guess an API, never
+  hand-roll a widget that `ui` already ships.
 - **No web assets.** `design/home-detail.html` is the design reference, not code
   to embed. Translate it into `ui` calls.
 - **`go build ./...`, `go vet ./...`, `go test ./...` must all pass** before
@@ -33,6 +34,8 @@ at `Y:\Learn\Go\mygo`.
 main.go                      → app.Run()
 internal/paths               the app's own data folder
 internal/library             find installed games (Steam manifests, folders, manual adds)
+internal/gse                 read local GSE emulator achievement saves
+internal/backup              portable JSON export and import
 internal/steam               Steam store data: description, screenshots, search
 internal/app                 the whole interface
 ```
@@ -59,7 +62,7 @@ internal/app                 the whole interface
   through `a.update`. Never call it on the view's goroutine.
 - The picked folder **is the game's own folder**, not a folder full of games.
   That is the whole difference from adding a games folder, which still exists
-  under the Wand menu.
+  under Settings.
 - **`ManualGame.Exe` stays relative to `Dir`.** `ExeFor` refuses a path
   that climbs out with `..` or is absolute. A relative path survives the folder
   moving; an absolute one does not.
@@ -99,9 +102,13 @@ internal/app                 the whole interface
    **game's own folder** (most games resolve assets relative to cwd) and
    `CREATE_NO_WINDOW`. That folder rule is the one thing that matters: launching
    from the launcher's cwd is the classic "game starts then crashes".
-2. The process is **released**, not waited on: the launcher stays usable, and
-   closing the game does not close the launcher.
-3. Nothing is injected, attached or hooked. If a game needs Steam running, it
+2. A goroutine waits on the process. The launcher stays usable, and closing the
+   game does not close the launcher. The wait ends the play session, so the
+   player need not press Quit game.
+3. While a session runs, `checkpointPlay` writes elapsed time every ten seconds.
+   A forced exit loses at most one checkpoint. Quitting records only the time
+   since the last checkpoint, and counts one session.
+4. Nothing is injected, attached or hooked. If a game needs Steam running, it
    starts Steam itself or fails visibly.
 
 ## Artwork and colour
@@ -136,7 +143,9 @@ internal/app                 the whole interface
 | `overlays.go` | search, add-folder, shortcuts, hint bar, toasts |
 | `addgame.go` | the "Add a game" form: folder picker, draft, commit |
 | `playing.go` | the running-session overlay with its live timer |
-| `play.go` | `play`, `quitPlay`, session timing |
+| `play.go` | `play`, `quitPlay`, `watchGame`, `checkpointPlay`, session timing |
+| `backup_ui.go` | export and import through the native file dialogs |
+| `settings.go` | the settings panel that replaced the native menu bar |
 | `chrome.go` | top bar, filter pills, icons, glass panel, buttons |
 | `art.go` | generated artwork, backdrop, `paintGame`, `accentOf` |
 | `covers.go` | real cover art: fetch, cache, decode, sample |
@@ -161,9 +170,11 @@ internal/app                 the whole interface
 - The description's "About" card shows six lines; `blurb` still cuts the store
   text at 380 characters first, which is not a measured line count, because
   MyGo's `MaxLines` truncates visually but cannot be asked whether it truncated.
-- The hub's Trophies, Completion and Recent sessions cards state that plainly: this
-  app has no achievement data, no completion percentage, and no per-session log
-  (`gameStats` keeps only `Played`, `Sessions`, `Last`). Do not invent them.
+- The hub's Completion and Recent sessions cards state that plainly: this app
+  has no completion percentage and no per-session log (`gameStats` keeps only
+  `Played`, `Sessions`, `Last`). Do not invent them. Trophies are real: Steam
+  unlocks need a Web API key and an account; a repack's local GSE save file is
+  read without either from `%APPDATA%\GSE Saves\<appid>\achievements.json`.
 - MyGo toasts are bottom-centre; the design puts them top-centre.
 
 ## Testing

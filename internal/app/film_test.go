@@ -347,7 +347,6 @@ func filmSubject(t *testing.T, a *app) string {
 	return ""
 }
 
-
 // waitFor blocks until cond holds, bounded by d, and fails the test with what
 // was being waited for when it does not.
 func waitFor(t *testing.T, d time.Duration, what string, cond func() bool) {

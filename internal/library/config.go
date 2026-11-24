@@ -20,6 +20,8 @@ type Config struct {
 	Hidden []string `json:"hidden,omitempty"`
 	// Manual are the games added one at a time, each with its own folder.
 	Manual []ManualGame `json:"manual,omitempty"`
+	// Favorites are the starred games, by the same key the stats use.
+	Favorites map[string]bool `json:"favorites,omitempty"`
 }
 
 // ManualGame is one game the user added by picking its folder: the case a scan
@@ -54,7 +56,7 @@ func DefaultConfig() Config {
 		Steam:   SteamRoots(),
 		Folders: gamesFolders(),
 	}
-}// LoadConfig reads the config file, falling back to the defaults for anything
+} // LoadConfig reads the config file, falling back to the defaults for anything
 // it does not say. A missing or damaged file is the default, not an error: the
 // launcher still starts.
 func LoadConfig(dataDir string) Config {

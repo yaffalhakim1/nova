@@ -35,9 +35,13 @@ bundled runtime.
   backdrop cross-fades over one second.
 - **Keeps play time.** Hours and sessions per game. Nova also imports the totals
   from Steam's own config, so a first run shows real hours instead of zeroes. It
-  merges those as `max`, so an import cannot count the same hour twice.
+  merges those as `max`, so an import cannot count the same hour twice. A running
+  session is saved every ten seconds and ends when the game closes.
+- **Exports and imports.** One JSON file carries play time, library entries,
+  favorites and local achievement unlocks. Open Settings (`S`) to find it.
 - **Shows achievements.** With a Steam Web API key, a game's full list, with each
-  achievement's rarity and the date you unlocked it.
+  achievement's rarity and the date you unlocked it. A repack's local GSE save
+  file is read too, without a key.
 - **Starts the game.** One click, from the game's own folder, with no console
   window.
 
@@ -70,14 +74,9 @@ go tool mygo dev
 
 - **Windows 10 or newer.**
 - **Go 1.27 or newer.**
-- **The MyGo checkout.** `go.mod` points at a sibling folder:
-
-  ```
-  replace github.com/egoist/mygo => ../mygo
-  ```
-
-  Clone [`egoist/mygo`](https://github.com/egoist/mygo) next to this repository
-  and the build works. Point the `replace` at wherever you keep it.
+- **MyGo comes from upstream.** `go.mod` pins a versioned module from
+  `https://github.com/egoist/mygo`. Go downloads it; no local checkout is needed.
+  Its docs and gallery are in that repository.
 - **Optionally, Steam.** Without it the launcher reads only the folders you add.
   The achievement list also needs a free
   [Steam Web API key](https://steamcommunity.com/dev/apikey).
@@ -88,7 +87,7 @@ Everything this app writes goes to `%APPDATA%\nova\`:
 
 | File | Holds |
 |---|---|
-| `library.json` | the extra folders to scan, the games added by hand, the games you removed |
+| `library.json` | the extra folders to scan, the games added by hand, favorites, the games you removed |
 | `stats.json` | time played and sessions, per game |
 | `covers\` | the cover art, cached |
 | `store\` | store descriptions, artwork and achievements, cached |

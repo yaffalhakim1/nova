@@ -58,7 +58,7 @@ func particleSeed(i int) particle {
 	seed := float64(i+1) * 2.399963 // the golden angle: spreads the dots out
 	return particle{
 		x:     frac(seed * 0.7351),
-		y:     frac(seed * 1.3819) * 920, // 920 is the tallest travel, below
+		y:     frac(seed*1.3819) * 920, // 920 is the tallest travel, below
 		speed: float64(particleSpeed) * (0.5 + frac(seed*0.917)),
 		size:  2.0 + 3.5*float32(frac(seed*1.553)),
 		phase: seed,
@@ -173,7 +173,7 @@ func (a *app) paintParticles(p *ui.Painter, r ui.Rect) {
 	t := float32(p.Now().Sub(a.epoch).Seconds())
 
 	for i := 0; i < particleCount; i++ {
-		seed := float64(i)*2.399963 // the golden angle: spreads the dots out
+		seed := float64(i) * 2.399963 // the golden angle: spreads the dots out
 		rx := frac(seed * 0.7351)
 		ry := frac(seed * 1.3819)
 		// Each dot gets its own pace, from half the base speed to one and a

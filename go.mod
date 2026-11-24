@@ -2,12 +2,7 @@ module github.com/yafit/nova
 
 go 1.27.3
 
-require (
-	github.com/coder/websocket v1.8.15
-	github.com/egoist/mygo v0.0.0
-)
-
-replace github.com/egoist/mygo => ../mygo
+require github.com/egoist/mygo v0.7.4
 
 require (
 	github.com/ebitengine/purego v0.11.1 // indirect

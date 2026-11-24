@@ -19,6 +19,7 @@ const (
 	overlayAddFolder
 	overlayAddGame
 	overlaySteamKey
+	overlaySettings
 )
 
 // shortcuts wires the keyboard the design lists: the arrows browse, Enter
@@ -79,6 +80,11 @@ func (a *app) shortcuts(c *ui.Context) {
 	if c.Shortcut(0, ui.KeyN) {
 		a.playSound("tick")
 		a.openAddGame()
+	}
+
+	// S opens the settings panel that replaced the native menu bar.
+	if c.Shortcut(0, ui.KeyS) {
+		a.openSettings()
 	}
 
 	if a.current != nil && c.Shortcut(0, ui.KeyEscape) {

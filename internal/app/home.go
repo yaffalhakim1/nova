@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/egoist/mygo/ui"
+
+	"github.com/yafit/nova/internal/library"
 )
 
 // gutter is the screen's side margin.
@@ -169,7 +171,6 @@ func (a *app) stage(c *ui.Context, w float32) {
 		})
 	})
 }
-
 
 // tile is one game's artwork, enlarged and ringed while it is in focus.
 func (a *app) tile(c *ui.Context, i int, e entry, size, height, side float32) {
@@ -522,6 +523,10 @@ func (a *app) favoriteBadge(c *ui.Context) {
 func (a *app) toggleFavorite(e entry) {
 	slug := e.slug()
 	a.favorites[slug] = !a.favorites[slug]
+	a.libCfg.Favorites = a.favorites
+	if err := library.SaveConfig(a.dataDir, a.libCfg); err != nil {
+		a.status = "could not save favorites: " + err.Error()
+	}
 
 	if a.favorites[slug] {
 		a.playSound("select")

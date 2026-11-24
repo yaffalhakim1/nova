@@ -373,24 +373,24 @@ func TestTrophiesCardFallsBackWhenThereIsNoData(t *testing.T) {
 	}
 }
 
-// TestLoadTrophiesNeedsAKeyAccountAndID checks the three things a load needs:
-// without any of them nothing is started and the card keeps its empty state,
-// rather than a request that comes back 401 retried on every frame.
-func TestLoadTrophiesNeedsAKeyAccountAndID(t *testing.T) {
+// TestLoadTrophiesNeedsAnID checks that a game with no app id starts nothing.
+// With an id but no key or account, Nova still looks for a local emulator save.
+// That read needs no network, and the card keeps its empty state.
+func TestLoadTrophiesNeedsAnID(t *testing.T) {
 	a := launcher(t, installsOf(1))
 	e := a.entries[0]
 
 	// No account: `launcher` resolves none, and no key is stored.
-	if g := a.trophiesFor(e); g != nil {
+	if g := a.trophiesFor(e); g != nil && len(g.list) > 0 {
 		t.Fatalf("a game with no account got trophies: %+v", g)
 	}
 	for i := 0; i < 5; i++ {
-		if g := a.trophiesFor(e); g != nil {
+		if g := a.trophiesFor(e); g != nil && len(g.list) > 0 {
 			t.Fatalf("a game with no account got trophies on frame %d: %+v", i, g)
 		}
 	}
-	if a.trophiesStarted(e.slug()) {
-		t.Error("a load was started with no account, key or app id")
+	if !a.trophiesStarted(e.slug()) {
+		t.Error("the local save was not looked for on a game with an app id")
 	}
 
 	// A game with no app id has nothing to ask about even with a key and an

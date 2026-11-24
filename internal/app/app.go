@@ -12,6 +12,7 @@ import (
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
+	"github.com/yafit/nova/internal/gse"
 	"github.com/yafit/nova/internal/library"
 	"github.com/yafit/nova/internal/paths"
 	steamstore "github.com/yafit/nova/internal/steam"
@@ -37,19 +38,19 @@ type app struct {
 
 	// section is the page under the header. query narrows the library, and
 	// sortBy orders it; genreFilter narrows it to one genre, "" for all.
-	section    int
-	sortBy     int
-	sortChoice string
+	section     int
+	sortBy      int
+	sortChoice  string
 	genreFilter string
-	query      string
-	lastQuery  string
+	query       string
+	lastQuery   string
 	// lastKey is the section, sort and query the entries were built for, so a
 	// frame that changed none of them does not rebuild the list.
-	lastKey int
-	lastSor int
+	lastKey   int
+	lastSor   int
 	lastGenre string
-	entries []entry
-	selected int
+	entries   []entry
+	selected  int
 
 	favorites map[string]bool
 
@@ -84,6 +85,7 @@ type app struct {
 	keyInput     string
 	keyProblem   string
 	steamKeyOpen bool
+	settingsOpen bool
 
 	// steam is the signed-in Steam account, resolved once at startup so the
 	// play time and the owned library always describe the same account.
@@ -100,6 +102,12 @@ type app struct {
 	// achievements holds the Steam achievements loaded per game, so the
 	// trophies card reads them without touching the network in a frame.
 	achievements trophyBoard
+
+	// gseRoot is where the GSE Steam emulator keeps local achievement saves.
+	// Tests point it at a temporary folder instead.
+	gseRoot string
+	// backupBusy keeps a second file dialog from opening while one is up.
+	backupBusy bool
 
 	// store is the Steam store data, and shots its screenshots.
 	store *steamstore.Client
@@ -182,7 +190,8 @@ func Run() error {
 			Content:         ui.View(a.view),
 		})
 		a.setWindowIcon()
-		a.setMenu()
+		// No native menu bar: its actions live in the settings button.
+		a.win.SetMenu(mygo.NewMenu(nil))
 	})
 	return mygo.App.Run()
 }
@@ -202,11 +211,17 @@ func (a *app) load() error {
 	a.covers = newCovers(a.dataDir)
 	a.covers.ready = func() { a.update(func() {}) }
 
+	a.gseRoot = gse.Root()
+
 	a.store = steamstore.NewClient(a.dataDir)
 	a.shots = newShots(a.dataDir)
 	a.shots.ready = func() { a.update(func() {}) }
 
 	a.libCfg = library.LoadConfig(a.dataDir)
+	if a.libCfg.Favorites == nil {
+		a.libCfg.Favorites = map[string]bool{}
+	}
+	a.favorites = a.libCfg.Favorites
 	a.stat = loadStats(a.dataDir)
 
 	// The Steam key is read once, from the credential store, and never written
@@ -263,6 +278,7 @@ func (a *app) update(fn func()) {
 // view builds the window: the home screen, or the open game over it.
 func (a *app) view(c *ui.Context) {
 	a.refresh()
+	a.checkpointPlay()
 	a.applyTheme(c)
 
 	a.shortcuts(c)
@@ -274,6 +290,7 @@ func (a *app) view(c *ui.Context) {
 	a.addOpen = a.overlay == overlayAddFolder
 	a.addGameOpen = a.overlay == overlayAddGame
 	a.steamKeyOpen = a.overlay == overlaySteamKey
+	a.settingsOpen = a.overlay == overlaySettings
 	a.playingOpen = a.overlay == overlayPlaying
 
 	// The backdrop is the window's, not a page's: it is painted once, at full
@@ -297,6 +314,7 @@ func (a *app) view(c *ui.Context) {
 	a.addFolderOverlay(c)
 	a.addGameOverlay(c)
 	a.steamKeyOverlay(c)
+	a.settingsOverlay(c)
 	a.trophiesModal(c)
 	a.playingOverlay(c)
 }

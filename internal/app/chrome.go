@@ -112,10 +112,7 @@ func (a *app) topBar(c *ui.Context) {
 					a.openAddGame()
 				})
 
-				iconButton(c, "settings", false, func() {
-					a.playSound("tick")
-					a.say("Settings", "not built yet")
-				})
+				iconButton(c, "settings", false, func() { a.openSettings() })
 
 				// The controller is a status light, not a button: it lights when
 				// a pad is connected.
@@ -245,5 +242,3 @@ func metaLine(c *ui.Context, parts ...string) {
 		FontWeight(300).
 		TextColor(inkDim)
 }
-
-
