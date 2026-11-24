@@ -19,6 +19,7 @@ import (
 const (
 	achievementsURL = "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/"
 	rarityURL       = "https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/"
+	schemaURL       = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/"
 )
 
 // achievementsCacheTTL is how long an account's unlocks are trusted. An unlock
@@ -231,6 +232,127 @@ func parseRarity(raw []byte) (map[string]float64, bool) {
 	return out, true
 }
 
+// SchemaEntry is the readable part of one achievement definition, keyed by the
+// API name the game and the emulator use.
+type SchemaEntry struct {
+	Name        string
+	Description string
+}
+
+// schemaCacheTTL is how long a game's definitions are trusted. They change with
+// a game update, not with a player, so a day is enough.
+const schemaCacheTTL = 24 * time.Hour
+
+// Schema maps a game's achievement API names to display names and descriptions.
+// A local emulator stores only API names, so this is how those names become
+// something a player can read. It needs the same Web API key as unlocks.
+func (c *Client) Schema(key, appID string) (map[string]SchemaEntry, bool) {
+	if c == nil || strings.TrimSpace(key) == "" || strings.TrimSpace(appID) == "" {
+		return nil, false
+	}
+	if entries, ok := c.cachedSchema(appID); ok {
+		return entries, true
+	}
+	entries, ok := c.fetchSchema(key, appID)
+	if !ok {
+		return nil, false
+	}
+	_ = c.saveSchema(appID, entries)
+	return entries, true
+}
+
+// fetchSchema calls the API once.
+func (c *Client) fetchSchema(key, appID string) (map[string]SchemaEntry, bool) {
+	q := url.Values{}
+	q.Set("key", key)
+	q.Set("appid", appID)
+	q.Set("l", "english")
+	q.Set("format", "json")
+
+	res, err := c.http.Get(schemaURL + "?" + q.Encode())
+	if err != nil {
+		return nil, false
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return nil, false
+	}
+	raw, err := io.ReadAll(io.LimitReader(res.Body, 8<<20))
+	if err != nil {
+		return nil, false
+	}
+	return parseSchema(raw)
+}
+
+// parseSchema reads the game wrapper Steam serves for a game's definitions.
+func parseSchema(raw []byte) (map[string]SchemaEntry, bool) {
+	var wrapper struct {
+		Game struct {
+			Stats struct {
+				Achievements []struct {
+					APIName string `json:"name"`
+					Name    string `json:"displayName"`
+					Desc    string `json:"description"`
+				} `json:"achievements"`
+			} `json:"availableGameStats"`
+		} `json:"game"`
+	}
+	if err := json.Unmarshal(raw, &wrapper); err != nil {
+		return nil, false
+	}
+
+	out := map[string]SchemaEntry{}
+	for _, a := range wrapper.Game.Stats.Achievements {
+		if a.APIName == "" {
+			continue
+		}
+		out[a.APIName] = SchemaEntry{Name: a.Name, Description: a.Desc}
+	}
+	if len(out) == 0 {
+		return nil, false
+	}
+	return out, true
+}
+
+// schemaPath is where one game's definitions are cached.
+func (c *Client) schemaPath(appID string) string {
+	return filepath.Join(c.dir, "schema-"+sanitize(appID)+".json")
+}
+
+// schemaFile is the cache's shape.
+type schemaFile struct {
+	Fetched time.Time              `json:"fetched"`
+	Entries map[string]SchemaEntry `json:"entries"`
+}
+
+// cachedSchema reads a fresh cache, or reports that there is none.
+func (c *Client) cachedSchema(appID string) (map[string]SchemaEntry, bool) {
+	raw, err := os.ReadFile(c.schemaPath(appID))
+	if err != nil {
+		return nil, false
+	}
+	var f schemaFile
+	if err := json.Unmarshal(raw, &f); err != nil || time.Since(f.Fetched) > schemaCacheTTL {
+		return nil, false
+	}
+	if len(f.Entries) == 0 {
+		return nil, false
+	}
+	return f.Entries, true
+}
+
+// saveSchema writes the cache whole, so a crash cannot leave half of it.
+func (c *Client) saveSchema(appID string, entries map[string]SchemaEntry) error {
+	if err := os.MkdirAll(c.dir, 0o755); err != nil {
+		return err
+	}
+	raw, err := json.MarshalIndent(schemaFile{Fetched: time.Now(), Entries: entries}, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(c.schemaPath(appID), raw, 0o644)
+}
+
 // jsonNumber is a number that Steam writes either bare or quoted, which is the
 // difference between `"percent":60.3` and `"percent":"60.3"`. It reads both so a
 // response of either shape decodes.
@@ -304,8 +426,8 @@ func (c *Client) rarityPath(appID string) string {
 
 // rarityFile is the cache's shape.
 type rarityFile struct {
-	Fetched   time.Time          `json:"fetched"`
-	Percents  map[string]float64 `json:"percents"`
+	Fetched  time.Time          `json:"fetched"`
+	Percents map[string]float64 `json:"percents"`
 }
 
 // cachedRarity reads a fresh cache, or reports that there is none.

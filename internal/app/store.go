@@ -1,7 +1,6 @@
 package app
 
 import (
-
 	"github.com/egoist/mygo/ui"
 
 	steamstore "github.com/yafit/nova/internal/steam"
@@ -187,4 +186,3 @@ func (a *app) appIDString(e entry) string {
 	defer a.mu.Unlock()
 	return a.appIDs[e.slug()]
 }
-

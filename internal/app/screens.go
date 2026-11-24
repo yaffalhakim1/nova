@@ -39,4 +39,3 @@ func (a *app) screenshots(c *ui.Context, e entry) {
 		}
 	})
 }
-

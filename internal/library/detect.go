@@ -28,7 +28,7 @@ type Install struct {
 	// Exe is the game's main executable, or empty when none was found.
 	Exe string
 	// AppID is the Steam app id, for a Steam install.
-	AppID string
+	AppID  string
 	Source Source
 
 	// Genre, Description and Hue are what the user typed when adding a game by

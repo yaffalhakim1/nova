@@ -199,7 +199,7 @@ func (a *app) libraryTile(c *ui.Context, e entry) {
 		// the ratio, which is what leaves room for the two lines under it.
 		cover := ui.Box(c).
 			FillWidth().
-			AspectRatio(1/portraiture).
+			AspectRatio(1 / portraiture).
 			Radius(18).
 			Draw(func(p *ui.Painter, r ui.Rect) { a.paintGame(p, r, 18, e, false) })
 		if card.Hovered() {
@@ -259,7 +259,7 @@ func (a *app) libraryAddTile(c *ui.Context) {
 	card.Children(func() {
 		box := ui.Box(c).
 			FillWidth().
-			AspectRatio(1/portraiture).
+			AspectRatio(1 / portraiture).
 			Radius(18).
 			Center()
 		box = glassSurface(box)

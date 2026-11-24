@@ -119,6 +119,14 @@ func (a *app) importSteam() {
 	a.mergeSteam(steamstore.Playtime(root, account.ID))
 }
 
+// addPlayed adds time to a game's history without counting a new session. It
+// is what a checkpoint uses; the whole session is counted once by record.
+func (s *stats) addPlayed(slug string, ran time.Duration) {
+	g := s.get(slug)
+	g.Played += ran
+	g.Last = time.Now()
+}
+
 // record adds one finished session to a game.
 func (s *stats) record(slug string, ran time.Duration) {
 	g := s.get(slug)

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"os"
 	"time"
 )
 
@@ -9,8 +10,17 @@ type playingSession struct {
 	slug  string
 	name  string
 	pid   uint32
+	proc  *os.Process
 	start time.Time
+	// lastCheck is the last time elapsed play time was written to disk.
+	lastCheck time.Time
+	// recorded is how much of this session is already in stats.json.
+	recorded time.Duration
 }
+
+// playCheckpointEvery is how often an open session is written to disk. A
+// forced exit then loses at most this much play time.
+const playCheckpointEvery = 10 * time.Second
 
 // play starts a game and opens the session window.
 func (a *app) play(e entry) {
@@ -29,18 +39,56 @@ func (a *app) play(e entry) {
 		return
 	}
 
+	now := time.Now()
 	a.playing = &playingSession{
-		slug:  e.slug(),
-		name:  e.name(),
-		pid:   uint32(proc.Pid),
-		start: time.Now(),
+		slug:      e.slug(),
+		name:      e.name(),
+		pid:       uint32(proc.Pid),
+		proc:      proc,
+		start:     now,
+		lastCheck: now,
 	}
 	a.playNote = "Started " + shortExe(e)
 	a.overlay = overlayPlaying
 
-	// The process is released once it is running: the launcher does not wait
-	// on the game, and closing the game does not close the launcher.
-	_ = proc.Release()
+	// The wait runs in its own goroutine, so the launcher stays usable and
+	// closing the game does not close Nova. It ends the session when the game
+	// exits, even if the player never presses Quit game.
+	go a.watchGame(proc, a.playing.slug)
+}
+
+// watchGame ends the session when the game process exits.
+func (a *app) watchGame(proc *os.Process, slug string) {
+	if _, err := proc.Wait(); err != nil {
+		return
+	}
+	a.update(func() {
+		if a.playing != nil && a.playing.slug == slug {
+			a.quitPlay()
+		}
+	})
+}
+
+// checkpointPlay writes the time played so far. It runs from the view loop,
+// so it shares the view's goroutine and needs no extra lock.
+func (a *app) checkpointPlay() {
+	if a.playing == nil {
+		return
+	}
+	now := time.Now()
+	if now.Sub(a.playing.lastCheck) < playCheckpointEvery {
+		return
+	}
+	ran := now.Sub(a.playing.start) - a.playing.recorded
+	if ran <= 0 {
+		return
+	}
+	a.playing.recorded += ran
+	a.playing.lastCheck = now
+	a.stat.addPlayed(a.playing.slug, ran)
+	if err := a.stat.save(a.dataDir); err != nil {
+		a.status = "could not save play time: " + err.Error()
+	}
 }
 
 // quitPlay ends the session the app tracks and records how long it ran.
@@ -50,7 +98,10 @@ func (a *app) quitPlay() {
 		return
 	}
 
-	ran := time.Since(a.playing.start)
+	ran := time.Since(a.playing.start) - a.playing.recorded
+	if ran < 0 {
+		ran = 0
+	}
 	a.stat.record(a.playing.slug, ran)
 
 	name := a.playing.name
