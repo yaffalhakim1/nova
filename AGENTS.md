@@ -98,13 +98,15 @@ internal/app                 the whole interface
 
 `app.play(e)`:
 
-1. `startGame(e)`: `exec.Command(e.inst.Exe)` with `cmd.Dir` set to the
-   **game's own folder** (most games resolve assets relative to cwd) and
-   `CREATE_NO_WINDOW`. That folder rule is the one thing that matters: launching
-   from the launcher's cwd is the classic "game starts then crashes".
-2. A goroutine waits on the process. The launcher stays usable, and closing the
-   game does not close the launcher. The wait ends the play session, so the
-   player need not press Quit game.
+1. `startGame(e)` asks Explorer to start `e.inst.Exe` with `cmd.Dir` set to the
+   **game's own folder**. That folder rule is the one thing that matters:
+   launching from the launcher's cwd is the classic "game starts then crashes".
+   Explorer must start the game: a process created directly by Go is invisible
+   to Discord's game detection, even with the same path and window title.
+   Helper processes may use `CREATE_NO_WINDOW`; the game must not.
+2. A goroutine finds the game's PID and watches it. The launcher stays usable,
+   and closing the game does not close the launcher. The watch ends the play
+   session, so the player need not press End session.
 3. While a session runs, `checkpointPlay` writes elapsed time every ten seconds.
    A forced exit loses at most one checkpoint. Quitting records only the time
    since the last checkpoint, and counts one session.

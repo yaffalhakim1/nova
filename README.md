@@ -42,8 +42,8 @@ bundled runtime.
 - **Shows achievements.** With a Steam Web API key, a game's full list, with each
   achievement's rarity and the date you unlocked it. A repack's local GSE save
   file is read too, without a key.
-- **Starts the game.** One click, from the game's own folder, with no console
-  window.
+- **Starts the game.** One click, through Explorer so Discord sees it, from the
+  game's own folder.
 
 ## Screenshots
 
