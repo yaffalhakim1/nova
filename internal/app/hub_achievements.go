@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"path/filepath"
 	"sort"
 	"time"
 
@@ -139,13 +140,14 @@ func (a *app) trophiesFor(e entry) *gameTrophies {
 	return a.trophiesLoaded(slug)
 }
 
-// trophyAppID is the id to ask about. A repack has no manifest id, so its
-// steam_appid.txt comes before the store search, which may not have answered.
+// trophyAppID is the id to ask about. A repack has no manifest id, and the
+// library entry may point at a parent folder, so the executable's folder is
+// checked too.
 func (a *app) trophyAppID(e entry) string {
 	if e.inst.AppID != "" {
 		return e.inst.AppID
 	}
-	if id := gse.AppID(e.inst.Dir); id != "" {
+	if id := gse.AppID(e.inst.Dir, filepath.Dir(e.inst.Exe)); id != "" {
 		return id
 	}
 	return a.appIDString(e)

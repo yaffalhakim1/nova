@@ -41,21 +41,29 @@ func Root() string {
 	return filepath.Join(base, "GSE Saves")
 }
 
-// AppID reads the app id a repack ships beside its executable. The value is
-// used as a folder name later, so only digits are accepted.
-func AppID(dir string) string {
-	if dir == "" {
-		return ""
+// AppID reads the app id a repack ships with its executable. Goldberg puts it
+// beside the exe or in steam_settings, and a library entry may point at a
+// parent folder, so every likely folder is checked.
+func AppID(dirs ...string) string {
+	for _, dir := range dirs {
+		if dir == "" {
+			continue
+		}
+		for _, path := range []string{
+			filepath.Join(dir, appIDFile),
+			filepath.Join(dir, "steam_settings", appIDFile),
+		} {
+			raw, err := os.ReadFile(path)
+			if err != nil {
+				continue
+			}
+			id := strings.TrimSpace(string(raw))
+			if validID(id) {
+				return id
+			}
+		}
 	}
-	raw, err := os.ReadFile(filepath.Join(dir, appIDFile))
-	if err != nil {
-		return ""
-	}
-	id := strings.TrimSpace(string(raw))
-	if !validID(id) {
-		return ""
-	}
-	return id
+	return ""
 }
 
 // Read loads one game's unlocks. A missing, empty or damaged file is no data,

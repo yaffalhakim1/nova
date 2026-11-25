@@ -132,4 +132,16 @@ func TestAppID(t *testing.T) {
 	if got := AppID(filepath.Join(dir, "missing")); got != "" {
 		t.Errorf("missing folder: AppID = %q, want empty", got)
 	}
+
+	// A repack may keep the id in steam_settings, one level below the exe.
+	nested := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(nested, "steam_settings"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(nested, "steam_settings", appIDFile), []byte("4115450"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := AppID(filepath.Join(nested, "..", "parent"), nested); got != "4115450" {
+		t.Errorf("AppID across folders = %q, want 4115450", got)
+	}
 }
