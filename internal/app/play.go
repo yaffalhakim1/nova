@@ -1,7 +1,6 @@
 package app
 
 import (
-	"os"
 	"time"
 )
 
@@ -9,8 +8,6 @@ import (
 type playingSession struct {
 	slug  string
 	name  string
-	pid   uint32
-	proc  *os.Process
 	start time.Time
 	// lastCheck is the last time elapsed play time was written to disk.
 	lastCheck time.Time
@@ -32,9 +29,7 @@ func (a *app) play(e entry) {
 		a.say("Cannot start "+e.name(), problem)
 		return
 	}
-
-	proc, err := startGame(e)
-	if err != nil {
+	if err := startGame(e); err != nil {
 		a.say("Cannot start "+e.name(), err.Error())
 		return
 	}
@@ -43,30 +38,37 @@ func (a *app) play(e entry) {
 	a.playing = &playingSession{
 		slug:      e.slug(),
 		name:      e.name(),
-		pid:       uint32(proc.Pid),
-		proc:      proc,
 		start:     now,
 		lastCheck: now,
 	}
 	a.playNote = "Started " + shortExe(e)
 	a.overlay = overlayPlaying
 
-	// The wait runs in its own goroutine, so the launcher stays usable and
+	// The watcher runs in its own goroutine, so the launcher stays usable and
 	// closing the game does not close Nova. It ends the session when the game
-	// exits, even if the player never presses Quit game.
-	go a.watchGame(proc, a.playing.slug)
+	// exits, even if the player never presses End session.
+	go a.watchGame(e.inst.Exe)
 }
 
-// watchGame ends the session when the game process exits.
-func (a *app) watchGame(proc *os.Process, slug string) {
-	if _, err := proc.Wait(); err != nil {
+// watchGame ends the session when the game process exits. Explorer starts the
+// game, so Nova finds it by name and follows that PID.
+func (a *app) watchGame(exe string) {
+	pid, ok := waitForGamePID(exe, 30*time.Second)
+	if !ok {
 		return
 	}
-	a.update(func() {
-		if a.playing != nil && a.playing.slug == slug {
-			a.quitPlay()
+	for {
+		time.Sleep(2 * time.Second)
+		if pidAlive(pid) {
+			continue
 		}
-	})
+		a.update(func() {
+			if a.playing != nil {
+				a.quitPlay()
+			}
+		})
+		return
+	}
 }
 
 // checkpointPlay writes the time played so far. It runs from the view loop,

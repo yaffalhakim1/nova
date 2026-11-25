@@ -5,13 +5,9 @@ import (
 )
 
 // playingOverlay is the session window the design shows once a game starts:
-// its cover, the running timer, and Quit.
+// its cover, the running timer, and one button to end the session.
 func (a *app) playingOverlay(c *ui.Context) {
-	ui.Modal(c, &a.playingOpen, func() {
-		if !a.playingOpen {
-			a.overlay = overlayNone
-			return
-		}
+	panel := ui.Modal(c, &a.playingOpen, func() {
 		if a.playing == nil {
 			a.overlay = overlayNone
 			return
@@ -36,15 +32,13 @@ func (a *app) playingOverlay(c *ui.Context) {
 
 			ui.Text(c, a.playNote).FontSize(13).TextColor(inkDim)
 
-			ui.Row(c).Gap(12).Children(func() {
-				primaryButton(c, "Quit game", func() { a.quitPlay() })
-				ui.Button(c, "Close").Radius(999).Padding(13, 28).OnClick(func() {
-					a.overlay = overlayNone
-				})
-			})
+			primaryButton(c, "End session", func() { a.quitPlay() })
 		})
 
 		// The timer is a moving value, so the frame must be asked for again.
 		c.AnimationFrame()
 	})
+	if panel.Dismissed() {
+		a.overlay = overlayNone
+	}
 }
