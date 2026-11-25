@@ -42,10 +42,10 @@ func TestHubShowsTheSixCards(t *testing.T) {
 		}
 	}
 
-	// These installs carry an app id but this test loads no achievements, so
-	// the trophies card says so rather than printing a ring it made up.
-	if !tt.HasText("Not tracked for this game.") {
-		t.Errorf("trophies does not say it has no data; texts = %q", tt.Texts())
+	// These installs carry an app id but this test has no key, so the card
+	// says that rather than printing a ring it made up.
+	if !tt.HasText("Add a Steam API key in Settings.") {
+		t.Errorf("trophies does not explain the missing key; texts = %q", tt.Texts())
 	}
 
 	// No session log is kept either.
@@ -357,7 +357,7 @@ func TestTrophiesCardFallsBackWhenThereIsNoData(t *testing.T) {
 	a.setTrophies(a.entries[0].slug(), &gameTrophies{})
 
 	tt := openHub(t, a, 1280, 840)
-	if !tt.HasText("Not tracked for this game.") {
+	if !tt.HasText("Add a Steam API key in Settings.") {
 		t.Fatalf("an empty answer did not fall back; texts = %q", tt.Texts())
 	}
 	if tt.HasText("0 of 0") {
@@ -368,7 +368,7 @@ func TestTrophiesCardFallsBackWhenThereIsNoData(t *testing.T) {
 	b := launcher(t, installsOf(1))
 	b.markTrophiesStarted(b.entries[0].slug())
 	tt = openHub(t, b, 1280, 840)
-	if !tt.HasText("Not tracked for this game.") {
+	if !tt.HasText("Add a Steam API key in Settings.") {
 		t.Fatalf("a failed load did not fall back; texts = %q", tt.Texts())
 	}
 }

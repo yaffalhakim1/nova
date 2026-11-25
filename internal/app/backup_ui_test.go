@@ -9,6 +9,18 @@ import (
 	"github.com/yafit/nova/internal/gse"
 )
 
+// TestSteamTrophiesAskForAKey checks the honest empty state for a Steam game
+// whose Web API key has not been stored yet.
+func TestSteamTrophiesAskForAKey(t *testing.T) {
+	a := launcher(t, installsOf(1))
+	tt := openHub(t, a, 1280, 840)
+	tt.Frame()
+
+	if !tt.HasText("Add a Steam API key in Settings.") {
+		t.Fatalf("the card does not explain the missing key; texts = %q", tt.Texts())
+	}
+}
+
 // TestBackupRestoresPlaytimeAndUnlocks checks the whole file path a player
 // uses after a reinstall: export, lose the data, import, and see the hours and
 // local unlocks again.

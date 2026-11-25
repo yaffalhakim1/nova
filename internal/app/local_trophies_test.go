@@ -16,7 +16,12 @@ func TestLocalTrophiesComeFromGSE(t *testing.T) {
 	const appID = "4115450"
 
 	gameDir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(gameDir, "steam_appid.txt"), []byte(appID), 0o644); err != nil {
+	exeDir := filepath.Join(gameDir, "platform", "steam")
+	settingsDir := filepath.Join(exeDir, "steam_settings")
+	if err := os.MkdirAll(settingsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(settingsDir, "steam_appid.txt"), []byte(appID), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -36,6 +41,7 @@ func TestLocalTrophiesComeFromGSE(t *testing.T) {
 	installs := installsOf(1)
 	installs[0].AppID = ""
 	installs[0].Dir = gameDir
+	installs[0].Exe = filepath.Join(exeDir, "PBZ.exe")
 	installs[0].Source = library.Manual
 
 	a := launcher(t, installs)

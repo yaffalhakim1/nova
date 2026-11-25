@@ -257,8 +257,16 @@ func (a *app) trophiesCard(c *ui.Context, e entry, width float32) {
 	g := a.trophiesFor(e)
 
 	if g == nil || len(g.list) == 0 {
+		line := "Not tracked for this game."
+		if a.trophyAppID(e) != "" {
+			if e.inst.AppID != "" && a.steamKey == "" {
+				line = "Add a Steam API key in Settings."
+			} else {
+				line = "No unlocks recorded yet."
+			}
+		}
 		hubCard(c, width, "Trophies", "", func() {
-			ui.Text(c, "Not tracked for this game.").
+			ui.Text(c, line).
 				FontSize(14).
 				TextColor(inkFaint).
 				LineHeight(1.5)
